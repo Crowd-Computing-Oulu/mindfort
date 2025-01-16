@@ -145,7 +145,7 @@ def index():
     lessons_ordered_for_user = {}
     
     
-    if session['user.lessons_order']:
+    if session.get('user.lessons_order'):
         for i in range (0, len(lessons)):
             lessons_ordered_for_user[i] = get_lesson_by_id_with_ordering(i, session['user.lessons_order'])
     
