@@ -144,8 +144,10 @@ def get_db_connection():
 def index():
     lessons_ordered_for_user = {}
     
-    for i in range (0, len(lessons)):
-        lessons_ordered_for_user[i] = get_lesson_by_id_with_ordering(i, session['user.lessons_order'])
+    
+    if session['user.lessons_order']:
+        for i in range (0, len(lessons)):
+            lessons_ordered_for_user[i] = get_lesson_by_id_with_ordering(i, session['user.lessons_order'])
     
     print(lessons_ordered_for_user)
     return render_template('index.html', 
