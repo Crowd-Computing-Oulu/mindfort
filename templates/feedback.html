@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'includes/head.html' %}
+
+<body class="d-flex flex-column min-vh-100">
+
+    {% include 'includes/navbar.html' %}
+
+    {% include 'includes/messages.html' %}
+
+    <div class="container-lg mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <a type="button" href="/lesson?id={{message.conversation_id}}" class="btn btn-primary btn-sm mb-5">Back to lesson</a>
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h2 class="text-center mb-4">Message Feedback</h2>
+                        <p>
+                            Message ID: <b>{{message.id}}</b>
+                        </p>
+                        <p>Messsage Content: <i>"{{message.content}}"</i>
+                        </p>
+
+                        <form class="mt-4"  method="POST">
+                            <textarea placeholder="Type your feedback here." id="feedback-content" name="feedback-content" class="form-control"></textarea>
+                            <input type="hidden" name="message-id" value="{{message.id}}">
+                            <button class="btn btn-primary mt-4" type="submit">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include 'includes/footer.html' %}
+
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
+    <script>
+        // Function to ask for confirmation before deleting the account
+        function confirmDeletion() {
+            // Use JavaScript's confirm to ask for user confirmation
+            const confirmed = confirm("Are you sure you want to delete your account? This action cannot be undone. ");
+            if (confirmed) {
+                // If confirmed, redirect to the deletion route
+                window.location.href = "/delete_account";
+            }
+        }
+    </script>
+
+</body>
+
+</html>

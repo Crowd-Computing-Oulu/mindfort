@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'includes/head.html' %}
+
+<body class="d-flex flex-column min-vh-100">
+ 
+    {% include 'includes/navbar.html' %}
+
+    {% include 'includes/messages.html' %}
+
+    <div class="container-lg">
+        HELLO
+    </div>
+
+    {% include 'includes/footer.html' %}
+
+</body>
+
+<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
+</html>

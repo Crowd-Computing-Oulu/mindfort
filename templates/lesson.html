@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'includes/head.html' %}
+
+<body class="d-flex flex-column min-vh-100">
+    {% include 'includes/navbar.html' %}
+
+    {% include 'includes/messages.html' %}
+
+    <div class="container-lg" style="min-height: 600px;">
+        <div class="row d-flex pt-3 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-6"">
+                <a type=" button" href="/" class="btn btn-primary btn-sm mb-5">Back to topics</a>
+
+                <h1>
+                    <b>{{ topic|capitalize }} Lesson {{ lesson.id + 1 }}</b>
+                </h1>
+                <h2 class="mb-3">
+                    {{ lesson.title }}
+                </h2>
+                <p class="mb-5">
+                    {{ lesson.desc }}
+                </p>
+
+                <div class="d-flex justify-content-center mb-4">
+                    {% for stage in range(0, 5) %}
+                        <div class="d-flex align-items-center">
+                            <div class="progress-dot {% if stage <= lesson_state %}active{% endif %}">
+                                {{ stage + 1 }}
+                            </div>
+                            {% if stage < 4 %}
+                                <div class="progress-line {% if stage < lesson_state %}active{% endif %}"></div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% if lesson_state == 0 %}
+                <form method="POST" action="/likert/pre/{{ lesson.id }}">
+                    <p style="font-size: 1.2em;" class="mb-3 mt-5">
+                        How certain are you about the following?
+                    </p>
+                
+                    <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
+                        <span style="font-size: 3em; position: absolute; left: 10px; top: 50%; transform: translateY(-50%);">“</span>
+                        <span class="m-5">{{ lesson.truth }}</span>
+                        <span style="font-size: 3em; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">”</span>
+                    </p>
+                
+                    <div class="mt-4">
+                        <!-- <label for="likert-scale">How much do you agree with the statement above?</label><br> -->
+                        <input type="range" style="border: none; box-shadow: none;" class="form-range m-3" id="likert-scale" name="likert_scale" min="1" max="7" step="1" required>
+                        <div class="d-flex justify-content-between">
+                            <span>Extremely Uncertain</span>
+                            <span>Extremely Certain</span>
+                        </div>
+                    </div>
+                
+                
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary mt-5">Submit</button>
+                    </div>
+                    
+                </form>
+                
+                {% endif %}
+                {% if lesson_state == 1 %}
+                    <div class="card" id="chat" style="height: 50vh; min-height: 650px;">
+                        <div class="card-header d-flex justify-content-between align-items-center p-3">
+                            <h5 class="mb-0">
+                                <b>Forty</b>
+
+                                {% if session['user.level'] < lesson.id + 1%} <span class="ms-5 text-muted small">
+                                    <span
+                                        style="display: inline-block; width: 10px; height: 10px; background-color: green; border-radius: 50%; margin-right: 5px;"></span>
+                                    Online
+                                    </span>
+                                    {% else %}
+                                    <span class="ms-5 text-muted small">
+                                        <span
+                                            style="display: inline-block; width: 10px; height: 10px; background-color: red; border-radius: 50%; margin-right: 5px;"></span>
+                                        Offline
+                                    </span>
+                                    {% endif %}
+                            </h5>
+                        </div>
+
+                        <div id="chat-body" class="card-body overflow-y-scroll h-50">
+                            {% if messages|length == 1 %}
+                                <div class="d-flex flex-column justify-content-center align-items-center h-100">
+                                    <p class="text-muted">Say hi to start the conversation!</p>
+                                </div>
+                            {% else %}
+                            {% for message in messages %}
+                            {% if message.role == "user" %}
+                            <div class="d-flex flex-row justify-content-end mb-4 pt-1">
+                                <div>
+                                    <p style="max-width: 400px; cursor: pointer;" 
+                                        class="small p-2 me-3 mb-1 text-white rounded-4 bg-primary"
+                                        data-bs-toggle="popover" 
+                                        tabindex="0"
+                                        data-bs-html="true" 
+                                        data-bs-trigger="focus"
+                                        title="Message ID {{message.id}}" 
+                                        data-bs-content="<a href='feedback?id={{message.id}}' class='btn btn-sm btn-primary me-2'>Feedback</a><a href='redact?id={{message.id}}' class='btn btn-sm btn-danger me-2'>Redact</a>">
+                                        {{ message.content }}
+                                    </p>
+                                </div>
+                                <img src="static/img/chat-user.png" alt="user avatar" class="sha"
+                                    style="width: 45px; height: 100%; margin-top: -4px;">
+                            </div>
+                            {% elif message.role == "assistant" %}
+                            <div class="d-flex flex-row justify-content-start mb-4">
+                                <img src="static/img/chat-forty.png" alt="assistant avatar"
+                                    style="width: 45px; height: 100%; margin-top: -5px">
+                                <div>
+                                    <p class="small p-2 ms-3 mb-1 rounded-4 bg-body-tertiary" 
+                                    style="max-width: 400px; cursor: pointer;" 
+                                        data-bs-toggle="popover" 
+                                        tabindex="0"
+                                        data-bs-html="true" 
+                                        data-bs-trigger="focus"
+                                        title="Message ID {{message.id}}" 
+                                        data-bs-content="<a href='feedback?id={{message.id}}' class='btn btn-sm btn-primary me-2'>Feedback</a><a href='redact?id={{message.id}}' class='btn btn-sm btn-danger me-2'>Redact</a>">
+                                        {{ message.content }}
+                                    </p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        {% if session['user.level'] < lesson.id + 1 %} <div
+                            class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
+                            <input type="text" class="form-control form-control ms-2 me-4" id="exampleFormControlInput1"
+                                placeholder="Type message">
+                            <button id="sendButton" class="btn btn-small rounded-pill shadow btn-primary text-center"
+                                style="width: 100px;">
+                                <img src="static/img/arrow.up.circle.fill.png" width="24px" style="margin-bottom: 2px;">
+                            </button>
+                    </div>
+                    <div class="card-footer text-muted d-flex justify-content-between align-items-center p-0">
+                        <div>
+                            <a class="btn btn-outline-danger btn-sm m-2" href="/erase_conv?id={{ lesson.id }}"
+                                onclick="return confirm('Are you sure you want to erase this conversation? This action cannot be undone.');">
+                                Erase conversation
+                            </a>
+
+                        </div>
+                        <div>
+                            <a class="btn btn-outline-success btn-sm m-2" href="/finish_conv?id={{ lesson.id }}">
+                                Finish conversation
+                            </a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class=" disabled card-footer text-muted d-flex justify-content-start align-items-center p-3">
+                        <input type="text" disabled class="form-control form-control ms-2 me-4" placeholder="Type message">
+                        <button disabled class="btn disabled btn-small rounded-pill shadow btn-primary text-center"
+                            style="width: 100px;">
+                            <img src="static/img/arrow.up.circle.fill.png" width="24px" style="margin-bottom: 2px;">
+                        </button>
+                    </div>
+                    <div class="card-footer text-muted d-flex justify-content-between align-items-center p-0">
+                        <div>
+                            <a class="btn btn-outline-danger btn-sm m-2" href="/erase_conv?id={{ lesson.id }}"
+                                onclick="return confirm('Are you sure you want to erase this conversation? This action cannot be undone.');">
+                                Erase conversation
+                            </a>
+
+                        </div>
+                        <div>
+                            <a disabled class="btn disabled btn-outline-success btn-sm m-2">
+                                Finish conversation
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <p class="text-muted text-center small mt-3 align-self-center">
+                    Your conversation will be anonymised and analysed by scientists, unless you opt out.<br>Learn more <a
+                        href="/dataprocessing">here</a>.
+                </p>
+            {% endif %}
+            {% if lesson_state == 2 %}
+            <form method="POST" action="/likert/mid/{{ lesson.id }}">
+                <p style="font-size: 1.2em;" class="mb-3 mt-5">
+                    How certain are you about the following?
+                </p>
+            
+                <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
+                    <span style="font-size: 3em; position: absolute; left: 10px; top: 50%; transform: translateY(-50%);">“</span>
+                    <span class="m-5">{{ lesson.truth }}</span>
+                    <span style="font-size: 3em; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">”</span>
+                </p>
+            
+                <div class="mt-4">
+                    <!-- <label for="likert-scale">How much do you agree with the statement above?</label><br> -->
+                    <input type="range" style="border: none; box-shadow: none;" class="form-range m-3" id="likert-scale" name="likert_scale" min="1" max="7" step="1" required>
+                    <div class="d-flex justify-content-between">
+                        <span>Extremely Uncertain</span>
+                        <span>Extremely Certain</span>
+                    </div>
+                </div>
+            
+            
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary mt-5">Submit</button>
+                </div>
+                
+            </form>
+            
+            {% endif %}
+            {% if lesson_state == 3 %}
+                <p style="font-size: 1.2em;" class="mb-3 mt-5">
+                    Read the following carefully
+                </p>
+            
+                <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
+                    <span style="font-size: 3em; position: absolute; left: 10px; top: 40px; transform: translateY(-50%);">“</span>
+                    <span class="m-5">{{ lesson.strongargument_written }}</span>
+                    <span style="font-size: 3em; position: absolute; right: 20px; bottom: -20px; ">”</span>
+                </p>
+
+                <div class="text-center">
+                    <form action="/finish_strongarg?id={{ lesson.id }}" method="GET">
+                        <button type="submit" class="btn btn-primary mt-5">Continue</button>
+                    </form>
+                </div>
+                
+            {% endif %}
+                {% if lesson_state == 4 %}
+                <form method="POST" action="/likert/post/{{ lesson.id }}">
+                    <p style="font-size: 1.2em;" class="mb-3 mt-5">
+                        How certain are you about the following?
+                    </p>
+                
+                    <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
+                        <span style="font-size: 3em; position: absolute; left: 10px; top: 50%; transform: translateY(-50%);">“</span>
+                        <span class="m-5">{{ lesson.truth }}</span>
+                        <span style="font-size: 3em; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">”</span>
+                    </p>
+                
+                    <div class="mt-4">
+                        <!-- <label for="likert-scale">How much do you agree with the statement above?</label><br> -->
+                        <input type="range" style="border: none; box-shadow: none;" class="form-range m-3" id="likert-scale" name="likert_scale" min="1" max="7" step="1" required>
+                        <div class="d-flex justify-content-between">
+                            <span>Extremely Uncertain</span>
+                            <span>Extremely Certain</span>
+                        </div>
+                    </div>
+                
+                
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary mt-5">Submit</button>
+                    </div>
+                    
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    </div>
+
+
+    {% include 'includes/footer.html' %}
+
+</body>
+
+<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
+<script>
+    // Function to send the message
+    function sendMessage() {
+        const inputField = document.getElementById('exampleFormControlInput1');
+        const sendButton = document.getElementById('sendButton');
+        const message = inputField.value.trim();
+        const chatBody = document.querySelector('#chat-body');
+
+        if(document.querySelector("#sayhi_text")){
+            document.querySelector('#sayhi_text').remove();
+        }
+
+        if (message) {
+            // Immediately add the user's message as a blue bubble
+            const userBubble = `
+                <div class="d-flex flex-row justify-content-end mb-4 pt-1">
+                    <div>
+                        <p style="max-width: 400px; cursor: pointer;" 
+                                    class="small p-2 me-3 mb-1 text-white rounded-4 bg-primary"
+                                    data-bs-toggle="popover" 
+                                    tabindex="0"
+                                    data-bs-html="true" 
+                                    data-bs-trigger="focus"
+                                    title="Message Actions" 
+                                    data-bs-content="<a  class='btn btn-sm btn-primary me-2'>Feedback</a><a  class='btn btn-sm btn-danger me-2'>Redact</a>">
+                                    ${message}
+                                </p>
+                    </div>
+                    <img src="static/img/chat-user.png" alt="avatar 1" style="width: 45px; height: 100%;">
+                </div>
+            `;
+            chatBody.innerHTML += userBubble;
+            chatBody.scrollTop = chatBody.scrollHeight; // Scroll to bottom
+            inputField.value = ''; // Clear input field
+
+            // Replace the send button with a loading spinner
+            const originalButtonHTML = sendButton.innerHTML;
+            sendButton.innerHTML = `<div class="spinner-border spinner-border-sm" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>`;
+            sendButton.disabled = true; // Disable the button
+
+            // Send message to Flask server via Fetch API
+            fetch('/send_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ conv_id: "{{ lesson.id }}", content: message })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Add bot's reply to the conversation
+                        const botBubble = `
+                        <div class="d-flex flex-row justify-content-start mb-4">
+                            <img src="static/img/chat-forty.png" alt="avatar 1" style="width: 45px; height: 100%;">
+                            <div>
+                                <p style="max-width: 400px;" class="small p-2 ms-3 mb-1 rounded-4 bg-body-tertiary">${data.bot_reply}</p>
+                            </div>
+                        </div>
+                    `;
+                        chatBody.innerHTML += botBubble;
+                        chatBody.scrollTop = chatBody.scrollHeight; // Scroll to bottom
+                    } else {
+                        alert('Message failed to send: ' + data.error);
+                    }
+                })
+                .catch(error => console.error('Error:', error))
+                .finally(() => {
+                    // Restore the send button and re-enable it
+                    sendButton.innerHTML = originalButtonHTML;
+                    sendButton.disabled = false;
+
+                    <!-- TODO: update message IDs and everything without refreshing the page -->
+                    location.reload()
+                });
+        }
+    }
+
+    // Send message on button click
+    document.getElementById('sendButton').addEventListener('click', sendMessage);
+
+    // Send message on Enter key press
+    document.getElementById('exampleFormControlInput1').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent form submission (if any)
+            sendMessage();
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        popoverTriggerList.forEach(function (popoverTriggerEl) {
+            new bootstrap.Popover(popoverTriggerEl, {
+                trigger: 'focus'
+              })
+              
+        });
+    });
+    
+    function redactMessage(messageId) {
+        console.log("Redact message with ID:", messageId);
+        // Add your redaction logic here
+    }
+    
+    function giveFeedback(messageId) {
+        console.log("Give feedback on message with ID:", messageId);
+        // Add your feedback logic here
+    }
+    
+</script>
+
+<style>
+    .progress-dot {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: grey;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .progress-dot.active {
+        background-color: blue;
+    }
+    .progress-line {
+        width: 50px;
+        height: 5px;
+        background-color: grey;
+    }
+    .progress-line.active {
+        background-color: blue;
+    }
+</style>
+
+</html>

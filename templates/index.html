@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'includes/head.html' %}
+
+
+<body class="d-flex flex-column min-vh-100">
+    
+    {% include 'includes/navbar.html' %}
+    
+    {% include 'includes/messages.html' %}
+
+    <div class="container-lg "  style="min-height: 600px;">
+        {% if session['user.id'] is defined %}
+            <!-- Signed-in User Content -->
+            <div class="text-center mb-2 mt-5">
+                <h2>Welcome, <b>{{ session['user.first_name'] }}</b>!</h2>
+            </div>
+
+            <div class="text-center mb-4">
+                Level <b class="text-primary" style="font-size: 2rem;">{{session['user.level'] + 1}}</b>
+            </div>
+
+            <div class="topics">
+                <div class="card p-3 rounded-5">
+
+                <div class="d-flex flex-wrap">
+                    {% for lesson_id, lesson_data in lessons.items() %}
+                    <div class="col-md-1 text-end">
+                        <img src="static/img/{{lesson_data['topic']}}.png" width="60px" class="mt-3 mb-3">
+                    </div>
+                    <div class="col-3">
+                        <div class="p-2">
+                            {% if session['user.level'] > lesson_id %} 
+                            <a 
+                                class="btn btn-outline-success w-100 rounded-4 disabled" 
+                                >
+                                <img src="{{ url_for('static', filename='img/checkmark.circle.png') }}" class="mb-1  me-2" width="18">
+                                <b>{{ lesson_id + 1 }}</b> {{ lesson_data['title'] }}
+                            </a>
+                            {% elif session['user.level'] < lesson_id %} 
+                            <a 
+                                class="btn btn-outline-danger w-100 rounded-4 disabled" >
+                                <img src="{{ url_for('static', filename='img/lock.png') }}" class="mb-1  me-2" width="18">
+                                <b>{{ lesson_id+ 1  }}</b> {{ lesson_data['title'] }}
+                            </a>
+                            {% else %} 
+                            <a 
+                                href="{{ url_for('lesson', id=loop.index - 1) }}" 
+                                class="btn btn-primary w-100 rounded-4" >
+                                <b>{{lesson_id+ 1  }}</b> {{ lesson_data['title'] }}
+                            </a>
+                            {% endif %} 
+                            
+                        </div>
+                    </div>
+                {% endfor %}
+                
+                </div>
+                </div>
+            </div>
+
+            <div class="m-5 text-center"> 
+                <img src="{{ url_for('static', filename='img/forty.png') }}" height="256px">
+            </div>
+        {% else %}
+            <!-- Non-Signed-in User Content -->
+<!-- Non-Signed-in User Content -->
+<div class="text-left">
+    <h1 class="m-5">Welcome to MindFort!</h1>
+    <div class="row">
+        <div class="col-md-8"> 
+            <p class="lead m-5">
+                MindFort is your personal mental defense system, designed to help you recognize, analyze, and counter misinformation across a wide range of topics. 
+                Strengthen your critical thinking, grow your confidence, and expand your knowledge through engaging lessons and discussions.
+            </p>
+        <ol class="m-5">
+            <li>Choose Your Lesson: Explore topics like dental health, mental wellness, cybersecurity, and more.</li>
+            <li>Debate Forty: Engage in a guided discussion where Forty presents a weakly argued, incorrect opinion on the topic.</li>
+            <li>Challenge and Learn: Counter the argument using facts and reasoning. With each discussion, you’ll sharpen your ability to spot flawed logic and misinformation.</li>
+            <li>Reflect and Grow: Gain insights into common misinformation tactics and learn how to debunk them effectively in real life.</li>
+        </ol>
+        </div>
+        <div class="col-md-4"> 
+            <img src="{{ url_for('static', filename='img/forty.png') }}" height="256px">
+            <br>
+            <a href="/signin" class="btn btn-primary btn-lg m-5">Get Started</a>
+        </div>
+
+    </div>
+  
+
+    
+
+    
+ 
+   
+    <!-- Topics Grid -->
+<div class="container mt-5">
+    <div class="row text-center">
+        
+        <!-- Medicine Topic -->
+        <div class="col-md-3 mb-4">
+            <div class="list-group">
+                <img src="{{ url_for('static', filename='img/medicine.png') }}" class="img-fluid mb-3 d-block mx-auto" alt="Medicine" style="max-width: 120px; height: auto;">
+                <h5 class="list-group-item active">Medicine</h5>
+                <p class="list-group-item">Learn about dental health, proper brushing habits, and common oral care misconceptions.</p>
+            </div>
+        </div>
+
+        <!-- Nature Topic -->
+        <div class="col-md-3 mb-4">
+            <div class="list-group">
+                <img src="{{ url_for('static', filename='img/nature.png') }}" class="img-fluid mb-3 d-block mx-auto" alt="Nature" style="max-width: 120px; height: auto;">
+                <h5 class="list-group-item active">Nature</h5>
+                <p class="list-group-item">Explore conservation, wildlife protection, and sustainable practices for the future.</p>
+            </div>
+        </div>
+
+        <!-- Self-Care Topic -->
+        <div class="col-md-3 mb-4">
+            <div class="list-group">
+                <img src="{{ url_for('static', filename='img/selfcare.png') }}" class="img-fluid mb-3 d-block mx-auto" alt="Self-Care" style="max-width: 120px; height: auto;">
+                <h5 class="list-group-item active">Self-Care</h5>
+                <p class="list-group-item">Focus on mental wellness, stress reduction, and emotional balance.</p>
+            </div>
+        </div>
+
+        <!-- Technology Topic -->
+        <div class="col-md-3 mb-4">
+            <div class="list-group">
+                <img src="{{ url_for('static', filename='img/technology.png') }}" class="img-fluid mb-3 d-block mx-auto" alt="Technology" style="max-width: 120px; height: auto;">
+                <h5 class="list-group-item active">Technology</h5>
+                <p class="list-group-item">Discover AI, machine learning, cybersecurity, and emerging tech trends.</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</div>
+
+            
+        {% endif %}
+    </div>
+    {% include 'includes/footer.html' %}
+    
+
+
+</body>
+
+<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
+</html>

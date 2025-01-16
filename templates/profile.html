@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'includes/head.html' %}
+
+<body class="d-flex flex-column min-vh-100">
+
+    {% include 'includes/navbar.html' %}
+
+    {% include 'includes/messages.html' %}
+
+    <div class="container-lg mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h3 class="text-center mb-4">Profile</h3>
+
+                        <!-- First and Last Name side by side -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label"><strong>First Name</strong></label>
+                                <div class="form-control bg-light">{{ session['user.first_name'] }}</div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label"><strong>Last Name</strong></label>
+                                <div class="form-control bg-light">{{ session['user.last_name'] }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Email Section -->
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Email</strong></label>
+                            <div class="form-control bg-light">{{ session['user.email'] }}</div>
+                        </div>
+
+                        <p class="small text-muted">
+                            Debug string;  {{ session }}
+                        </p>
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between mb-3">
+                            <!-- Delete Account Button -->
+                            <a href="javascript:void(0);" class="btn btn-outline-danger btn-sm" onclick="confirmDeletion()">Delete Account</a>
+                            <!-- Sign Out Button -->
+                            <a href="/signout" class="btn btn-danger btn-sm">Sign Out</a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+       
+    </div>
+
+    
+
+    {% include 'includes/footer.html' %}
+
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
+    <script>
+        // Function to ask for confirmation before deleting the account
+        function confirmDeletion() {
+            // Use JavaScript's confirm to ask for user confirmation
+            const confirmed = confirm("Are you sure you want to delete your account? This action cannot be undone.");
+            if (confirmed) {
+                // If confirmed, redirect to the deletion route
+                window.location.href = "/delete_account";
+            }
+        }
+    </script>
+
+</body>
+
+</html>

@@ -160,5 +160,9 @@ cython_debug/
 #.idea/
 
 
-./notes
-./database.db
+
+graphics.afdesign
+notes
+static/.DS_Store
+database.db
+.DS_Store
