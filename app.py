@@ -19,7 +19,7 @@ app.logger.setLevel(logging.ERROR)
 app.secret_key = 'mindfort2024'
 
 DATABASE = 'database.db'
-VERSION = "v25.01.15 ALPHA"
+VERSION = "v25.01.17 BETA"
 
 def init_db():
     def table_exists(conn, table_name):
@@ -57,18 +57,22 @@ def init_db():
             CREATE TABLE users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 level INTEGER NOT NULL,
-                lesson_state INTEGER NOT NULL,
-                first_name TEXT NOT NULL,
-                last_name TEXT NOT NULL,
+                lesson_state INTEGER NOT NULL CHECK(lesson_state IN (0, 1, 2, 3, 4)),
+                first_name TEXT,
+                last_name TEXT,
+                username TEXT UNIQUE NOT NULL,
+                age INTEGER,
+                gender TEXT,
+                country TEXT,
                 lesson_cases TEXT NOT NULL,
                 signup_datetime DATETIME NOT NULL,
                 ip TEXT NOT NULL,
                 lessons_order TEXT NOT NULL,
-                email TEXT UNIQUE NOT NULL,
+                email TEXT UNIQUE,
                 password TEXT NOT NULL
             )
             """)
-
+        
         # Ensure feedback table exists
         if not table_exists(conn, "feedback"):
             print("Creating 'feedback' table...")
@@ -82,9 +86,9 @@ def init_db():
             )
             """)
             
-        # Ensure likert table exists
+        # Ensure likert_pre table exists
         if not table_exists(conn, "likert_pre"):
-            print("Creating 'likert' table...")
+            print("Creating 'likert_pre' table...")
             conn.execute("""
             CREATE TABLE likert_pre (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -92,14 +96,13 @@ def init_db():
                 lesson_id INTEGER NOT NULL,
                 value INTEGER NOT NULL,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY(user_id) REFERENCES users(id),
-                FOREIGN KEY(lesson_id) REFERENCES lessons(id)
+                FOREIGN KEY(user_id) REFERENCES users(id)
             )
             """)
             
-         # Ensure likert table exists
+         # Ensure likert_mid table exists
         if not table_exists(conn, "likert_mid"):
-            print("Creating 'likert' table...")
+            print("Creating 'likert_mid' table...")
             conn.execute("""
             CREATE TABLE likert_mid (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -107,14 +110,13 @@ def init_db():
                 lesson_id INTEGER NOT NULL,
                 value INTEGER NOT NULL,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY(user_id) REFERENCES users(id),
-                FOREIGN KEY(lesson_id) REFERENCES lessons(id)
+                FOREIGN KEY(user_id) REFERENCES users(id)
             )
             """)
             
-         # Ensure likert table exists
+         # Ensure likert_post table exists
         if not table_exists(conn, "likert_post"):
-            print("Creating 'likert' table...")
+            print("Creating 'likert_post' table...")
             conn.execute("""
             CREATE TABLE likert_post (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -122,8 +124,21 @@ def init_db():
                 lesson_id INTEGER NOT NULL,
                 value INTEGER NOT NULL,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY(user_id) REFERENCES users(id),
-                FOREIGN KEY(lesson_id) REFERENCES lessons(id)
+                FOREIGN KEY(user_id) REFERENCES users(id)
+            )
+            """)
+            
+        # Ensure argument_essays table exists
+        if not table_exists(conn, "argument_essays"):
+            print("Creating 'argument_essays' table...")
+            conn.execute("""
+            CREATE TABLE argument_essays (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                lesson_id INTEGER NOT NULL,
+                content TEXT NOT NULL,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(user_id) REFERENCES users(id)
             )
             """)
 
@@ -159,32 +174,34 @@ def index():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        first_name = request.form['signup-firstname']
-        last_name = request.form['signup-lastname']
-        email = request.form['signup-email']
+        first_name = request.form.get('signup-firstname', '')
+        last_name = request.form.get('signup-lastname', '')
+        username = request.form['signup-username']  # Mandatory
+        age = request.form.get('signup-age', '')
+        gender = request.form.get('signup-gender', '')
+        country = request.form.get('signup-country', '')
+        email = request.form.get('signup-email', '')
         password = request.form['signup-password']
         confirm_password = request.form['signup-password-confirm']
         terms = request.form.get('terms')
-        
+
         if not terms:
             flash('You must accept the terms and conditions.', 'danger')
             return redirect(url_for('signup'))
-
+        
         if password != confirm_password:
             flash('Passwords do not match.', 'danger')
             return redirect(url_for('signup'))
 
-        hashed_password = generate_password_hash(password, method='pbkdf2')
-        
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+
         # Get signup datetime and IP
         signup_datetime = datetime.utcnow()
         user_ip = request.remote_addr
 
         # Generate lesson order
-        lessons = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-        random.shuffle(lessons)  # Shuffle categories
-
-
+        lessons = list(range(12))  # Lessons ID 0 to 11
+        random.shuffle(lessons)  # Shuffle lessons
         # Convert lesson order to string for storage
         lesson_order_str = ','.join(map(str, lessons))
 
@@ -195,21 +212,48 @@ def signup():
         try:
             conn = get_db_connection()
             conn.execute("""
-            INSERT INTO users (first_name, last_name, email, password, level, lesson_state, signup_datetime, ip, lessons_order, lesson_cases) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", 
-            (first_name, last_name, email, hashed_password, 0, 0, signup_datetime, user_ip, lesson_order_str, lesson_cases_str))
+                INSERT INTO users (first_name, last_name, username, age, gender, country, email, password, level, lesson_state, signup_datetime, ip, lessons_order, lesson_cases)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                         (first_name, last_name, username, age, gender, country, email, hashed_password, 0, 0, signup_datetime, user_ip, lesson_order_str, lesson_cases_str))
             conn.commit()
             conn.close()
-            flash('Account created successfully! You can now sign in.', 'success')
-            return redirect(url_for('signin'))
-        except sqlite3.IntegrityError:
-            flash('Email is already registered.', 'danger')
+            
+            flash('Account created successfully!', 'success')
 
-    return render_template('signin.html',
+            # Sign user in automatically
+            conn = get_db_connection()
+            user = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+            conn.close()
+
+            if user and check_password_hash(user['password'], password):
+                session['user.id'] = user['id']
+                session['user.username'] = user['username']
+                session['user.email'] =  user['email']
+                session['user.first_name'] =  user['first_name']
+                session['user.last_name'] = user['last_name']
+                session['user.level'] = user['level']
+                session['user.lesson_state'] = user['lesson_state']
+                session['user.lessons_order'] = user['lessons_order']
+                session['user.lesson_cases'] = user['lesson_cases'].split(',')
+                session['user.age'] = user['age']
+                session['user.gender'] = user['gender']
+                session['user.country'] = user['country']
+                return redirect(url_for('index'))
+            else:
+                flash('Invalid username or password.', 'danger')
+                return redirect(url_for('signin'))
+        
+        except sqlite3.IntegrityError:
+            flash('Username or email is already registered.', 'danger')
+            return render_template('signup.html',
+                                   session_id=get_session_id(),
+                                   version=VERSION,
+                                   current_path=request.path)
+    
+    return render_template('signup.html',
                            session_id=get_session_id(),
                            version=VERSION,
                            current_path=request.path)
-
 @app.route('/signin', methods=['GET', 'POST'])
 def signin():
     if request.method == 'POST':
@@ -217,18 +261,22 @@ def signin():
         password = request.form['signin-password']
 
         conn = get_db_connection()
-        user = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+        user = conn.execute("SELECT * FROM users WHERE email = ? OR username = ?", (email,email,)).fetchone()
         conn.close()
 
         if user and check_password_hash(user['password'], password):
             session['user.id'] = user['id']
-            session['user.email'] = user['email']
-            session['user.first_name'] = user['first_name']
+            session['user.username'] = user['username']
+            session['user.email'] =  user['email']
+            session['user.first_name'] =  user['first_name']
             session['user.last_name'] = user['last_name']
             session['user.level'] = user['level']
             session['user.lesson_state'] = user['lesson_state']
             session['user.lessons_order'] = user['lessons_order']
-            session['user.lesson_cases'] = user['lesson_cases']
+            session['user.lesson_cases'] = user['lesson_cases'].split(',')
+            session['user.age'] = user['age']
+            session['user.gender'] = user['gender']
+            session['user.country'] = user['country']
             flash('Signed in successfully!', 'success')
             return redirect(url_for('index'))
         else:
@@ -239,10 +287,11 @@ def signin():
       version = VERSION,
       current_path=request.path)
 
+
 @app.route('/lesson', methods=['GET'])
 def lesson():
     try:
-        id = int(request.args['id'])  # Use 'id' as conversation_id
+        id = int(request.args.get("id"))  # Use 'id' as lesson_id
         user_id = session.get('user.id') 
         # Fetch messages for the conversation
         messages = get_messages_from_db(user_id,id)
@@ -346,20 +395,20 @@ def likert(version,lesson_id):
     return redirect(f'/lesson?id={lesson_id}')
 
 
-def get_messages_from_db(user_id, conversation_id):
+def get_messages_from_db(user_id, lesson_id):
     
-    weakargument_base = "You are Forty, a proactive educational chat partner within the MindFort system. MindFort uses cognitive inoculation theory to help users recognize and counter misinformation, which means that you try to weakly (but proactively) argue against a positive attitude that the user holds, so that they can form complete opinions, knowledge and defence against such attacks. You speak proactively about the subject of this discussion and keep your messages in a short format suitable for a real time chat. When the user starts talking to you, you can say hi back and immediately get started with the discussion, and when the user tries to talk about something else, nudge them back to this topic. Refuse to talk about off-topic things. For this discussion, argue that "
+    weakargument_base = "You are Forty, a proactive educational chat partner within the MindFort system. MindFort uses cognitive inoculation theory to help users recognize and counter misinformation, which means that you try to weakly (but proactively) argue against a positive attitude that the user holds, so that they can form complete opinions, knowledge and defence against such attacks. You don't show any sign of doubt about your (incorrect) opinion until the user starts presenting facts they looked up or logical arguments. Your job is to be a person that says incorrect things that the user has to disprove and correct using logic and facts. You speak proactively about the subject of this discussion and keep your messages in a short format suitable for a real time chat. When the user starts talking to you, you can say hi back and immediately get started with the discussion, and when the user tries to talk about something else, nudge them back to this topic. Refuse to talk about off-topic things. For this discussion, argue that "
     
     messages = []
     with sqlite3.connect(DATABASE) as conn:
         cursor = conn.cursor()
-        # Fetch messages from the database for the given conversation_id
+        # Fetch messages from the database for the given lesson_id
         cursor.execute("""
             SELECT id, sent_by_user, content
             FROM messages
             WHERE conversation = ? AND user_id = ?
             ORDER BY created_at ASC
-        """, (conversation_id, user_id))
+        """, (lesson_id, user_id))
         
         rows = cursor.fetchall()
 
@@ -374,7 +423,7 @@ def get_messages_from_db(user_id, conversation_id):
 
     messages.insert(0, {
         "role": "system",
-        "content": weakargument_base + get_lesson_by_id_with_ordering(conversation_id, session['user.lessons_order'])['llmprompt']
+        "content": weakargument_base + get_lesson_by_id_with_ordering(lesson_id, session['user.lessons_order'])['llmprompt']
     })
 
     return messages
@@ -399,7 +448,7 @@ def get_message_from_db_by_id(id):
             return {
                 "id": row[0],
                 "role": role,
-                "conversation_id": row[3],
+                "lesson_id": row[3],
                 "content": row[2]
             }            
 
@@ -407,7 +456,7 @@ def get_message_from_db_by_id(id):
 @app.route('/finish_conv')
 def finish_conv():
     # Retrieve the conversation ID and user ID
-    conversation_id = int(request.args.get('id', 0))  # Default to 0 if 'id' is not provided
+    lesson_id =  int(request.args.get("id"))
     user_id = session.get('user.id')  # Assuming the user ID is stored in the session under 'user_id'
 
     if not user_id:
@@ -435,12 +484,12 @@ def finish_conv():
     finally:
         conn.close()
 
-    return redirect(f'lesson?id={conversation_id}')
+    return redirect(f'lesson?id={lesson_id}')
 
-@app.route('/finish_strongarg')
-def finish_strongarg():
+@app.route('/finish_stage', methods=['GET', 'POST'])
+def finish_stage():
     # Retrieve the conversation ID and user ID
-    conversation_id = int(request.args.get('id', 0))  # Default to 0 if 'id' is not provided
+    lesson_id = int(request.form.get('id'))
     user_id = session.get('user.id')  # Assuming the user ID is stored in the session under 'user_id'
 
     if not user_id:
@@ -468,9 +517,7 @@ def finish_strongarg():
     finally:
         conn.close()
 
-    return redirect(f'lesson?id={conversation_id}')
-
-
+    return redirect(f'lesson?id={lesson_id}')
 
 @app.route('/profile')
 def profile():
@@ -488,6 +535,13 @@ def signout():
 @app.route('/terms')
 def terms():
     return render_template('terms.html',
+        session_id = get_session_id(),
+        version = VERSION,
+        current_path=request.path)
+    
+@app.route('/about')
+def about():
+    return render_template('about.html',
         session_id = get_session_id(),
         version = VERSION,
         current_path=request.path)
@@ -511,7 +565,7 @@ def feedback():
 
         flash("Feedback submitted successfully.", "success")
         message = get_message_from_db_by_id(message_id)
-        return redirect(url_for('lesson', id=message['conversation_id']))
+        return redirect(url_for('lesson', id=message['lesson_id']))
 
     # Render feedback form
     message_id = int(request.args.get('id'))
@@ -637,25 +691,64 @@ def send_message():
     # Return both the user's message and the bot's reply
     return jsonify(success=True, user_message=user_message, bot_reply=bot_reply)
 
+@app.route('/submit_essay', methods=['POST'])
+def submit_essay():
+    user_id = session.get('user.id') 
+    lesson_id = int(request.args.get('id'))
+    content = request.form.get('content')
+
+    if not content or len(content) < 200:
+        return jsonify({"error": "Essay content is required and must be at least 250 characters long."}), 400
+
+    conn = get_db_connection()
+    conn.execute(
+        "INSERT INTO argument_essays (user_id, lesson_id, content) VALUES (?, ?, ?)",
+        (user_id, lesson_id, content)
+    )
+    conn.commit()
+    conn.close()
+    
+    try:
+        conn = get_db_connection()
+        with conn:
+            # Increment the user's lesson_state in the database
+            conn.execute(
+                "UPDATE users SET lesson_state = lesson_state + 1 WHERE id = ?",
+                (user_id,)
+            )
+            # Update the session to reflect the new lesson_state
+            user_level = conn.execute(
+                "SELECT lesson_state FROM users WHERE id = ?",
+                (user_id,)
+            ).fetchone()
+            session['user.lesson_state'] = user_level[0] if user_level else session.get('lesson_state', 0)
+
+        flash('Stage finished. On to the next lesson stage.', 'success')
+    except Exception as e:
+        flash(f'An error occurred: {e}', 'error')
+    finally:
+        conn.close()
+
+    return redirect(f"/lesson?id={lesson_id}") 
+
 @app.route("/erase_conv")
 def erase_conv():
-    print("asd")
-    conversation_id = request.args.get("id")
-    if not conversation_id:
+    lesson_id = request.args.get("id")
+    if not lesson_id:
         flash("No conversation ID provided.", "error")
         return redirect(url_for("home"))  # Replace "home" with your desired redirect endpoint
 
     try:
         conn = get_db_connection()
         with conn:
-            conn.execute("DELETE FROM messages WHERE conversation = ?", (conversation_id,))
-        flash("Conversation erased successfully.", "success")
+            conn.execute("DELETE FROM messages WHERE conversation = ?", (lesson_id,))
+        flash("Conversation reset successfully.", "success")
     except Exception as e:
         flash(f"An error occurred: {str(e)}", "error")
     finally:
         conn.close()
 
-    return redirect(f"/lesson?id={conversation_id}") 
+    return redirect(f"/lesson?id={lesson_id}") 
 
 
 @app.errorhandler(404)

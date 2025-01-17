@@ -9,17 +9,19 @@
 
     {% include 'includes/messages.html' %}
 
-    <div class="container-lg  d-flex justify-content-center align-items-center vh-100">
-        <div class="row w-100">
+    <div class="container-lg d-flex justify-content-center align-items-center">
+        <div class="row w-100 mt-5">
+            <div class="col-lg-3 ">
+            </div>
             <!-- Sign In Form -->
             <div class="col-lg-6 mb-3 mb-lg-0">
                 <div class="card shadow">
                     <div class="card-body">
-                        <h3 class="text-center mb-4">Sign In</h3>
+                        <h2 class="text-center mb-4">Sign In</h2>
                         <form action="signin" method="POST">
                             <div class="mb-3">
-                                <label for="signin-email" class="form-label">Email address</label>
-                                <input type="email" class="form-control" name="signin-email" placeholder="Enter your email">
+                                <label for="signin-email" class="form-label">Email address or username</label>
+                                <input type="text" class="form-control" name="signin-email" placeholder="Enter your email address or username">
                             </div>
                             <div class="mb-3">
                                 <label for="signin-password" class="form-label">Password</label>
@@ -29,54 +31,13 @@
                         </form>
                     </div>
                 </div>
+
+               <div class="text-center mt-4"> You don't have an account yet? <a href="/signup">Create one here</a>.</div>
             </div>
+            <div class="col-lg-3 ">
+            </div>
+
             
-            <!-- Sign Up Form -->
-            <div class="col-lg-6">
-                <div class="card shadow">
-                    <div class="card-body">
-                        <h3 class="text-center mb-4">Sign Up</h3>
-                        <form action="/signup" method="POST" autocomplete="off">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="signup-firstname" class="form-label">First Name</label>
-                                        <input type="text" class="form-control" name="signup-firstname" placeholder="Enter your first name" autocomplete="off">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="signup-lastname" class="form-label">Last Name</label>
-                                        <input type="text" class="form-control" name="signup-lastname" placeholder="Enter your last name" autocomplete="off">
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="signup-email" class="form-label">Email Address</label>
-                                <input type="email" class="form-control" name="signup-email" placeholder="Enter your email" autocomplete="off">
-                            </div>
-                            <div class="mb-3">
-                                <label for="signup-password" class="form-label">Password</label>
-                                <input type="password" class="form-control" name="signup-password" placeholder="Enter your password" autocomplete="off">
-                            </div>
-                            <div class="mb-3">
-                                <label for="signup-password-confirm" class="form-label">Confirm Password</label>
-                                <input type="password" class="form-control" name="signup-password-confirm" placeholder="Confirm your password" autocomplete="off">
-                            </div>
-                            <div class="form-check mb-3">
-                                <input type="checkbox" class="form-check-input" name="terms">
-                                <label class="form-check-label" for="terms">
-                                    I accept the <a href="/terms" target="_blank">Terms and Conditions</a>
-                                </label>
-                            </div>
-                            <button type="submit" class="btn btn-success w-100">Sign Up</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-
         </div>
     </div>
 

@@ -16,22 +16,51 @@
                     <div class="card-body">
                         <h3 class="text-center mb-4">Profile</h3>
 
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Username</strong></label>
+                            <div class="form-control bg-light">
+                                {{ session['user.username'].title()}}
+                            </div>
+                        </div>
+
                         <!-- First and Last Name side by side -->
                         <div class="row mb-3">
                             <div class="col-6">
                                 <label class="form-label"><strong>First Name</strong></label>
-                                <div class="form-control bg-light">{{ session['user.first_name'] }}</div>
+                                <div class="form-control bg-light">
+                                    {% if session['user.first_name'] == "" %} Not given {% else %} {{ session['user.first_name'].title()}}{% endif %}
+                                </div>
                             </div>
                             <div class="col-6">
                                 <label class="form-label"><strong>Last Name</strong></label>
-                                <div class="form-control bg-light">{{ session['user.last_name'] }}</div>
+                                <div class="form-control bg-light">
+                                    {% if session['user.last_name'] == "" %} Not given {% else %} {{ session['user.last_name'].title()}}{% endif %}
+                                </div>
                             </div>
                         </div>
 
                         <!-- Email Section -->
                         <div class="mb-3">
                             <label class="form-label"><strong>Email</strong></label>
-                            <div class="form-control bg-light">{{ session['user.email'] }}</div>
+                            <div class="form-control bg-light">
+                                {% if session['user.email'] == "" %} Not given {% else %} {{ session['user.email']}}{% endif %}
+                            </div>
+                        </div>
+
+
+                         <div class="mb-3">
+                            <label class="form-label"><strong>Gender</strong></label>
+                            <div class="form-control bg-light">
+                                {% if session['user.gender'] == "" %} Not given {% else %} {{ session['user.gender'].title()}}{% endif %}
+                            </div>
+                        </div>
+
+
+                         <div class="mb-3">
+                            <label class="form-label"><strong>Country</strong></label>
+                            <div class="form-control bg-light">
+                                {% if session['user.country'] == "" %} Not given {% else %} {{ session['user.country'].title()}}{% endif %}
+                            </div>
                         </div>
 
                         <p class="small text-muted">

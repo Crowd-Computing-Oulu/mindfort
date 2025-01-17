@@ -14,7 +14,11 @@
         {% if session['user.id'] is defined %}
             <!-- Signed-in User Content -->
             <div class="text-center mb-2 mt-5">
-                <h2>Welcome, <b>{{ session['user.first_name'] }}</b>!</h2>
+               
+                
+                    <h2>Welcome, <b>{% if session['user.first_name'] == "" %}{{ session['user.username'].title() }} {% else %} {{ session['user.first_name'].title()}}{% endif %}</b>!</h2>
+
+                
             </div>
 
             <div class="text-center mb-4">
@@ -50,6 +54,11 @@
                                 class="btn btn-primary w-100 rounded-4" >
                                 <b>{{lesson_id+ 1  }}</b> {{ lesson_data['title'] }}
                             </a>
+                            <!-- Progress Bar -->
+                            <div class="progress mt-3" style="height: 15px;">
+                                <div class="progress-bar" role="progressbar" style="width: {{ (session['user.lesson_state']) * 20 }}%;" aria-valuenow="{{ session['user.lesson_state'] }}" aria-valuemin="" aria-valuemax="4">
+                                </div>
+                            </div>
                             {% endif %} 
                             
                         </div>
@@ -70,21 +79,20 @@
     <h1 class="m-5">Welcome to MindFort!</h1>
     <div class="row">
         <div class="col-md-8"> 
-            <p class="lead m-5">
-                MindFort is your personal mental defense system, designed to help you recognize, analyze, and counter misinformation across a wide range of topics. 
-                Strengthen your critical thinking, grow your confidence, and expand your knowledge through engaging lessons and discussions.
+            <p class="lead m-4">
+                MindFort is designed to help you recognize and counter misinformation across a wide range of topics. 
+                Strengthen your critical thinking, and expand your knowledge through engaging lessons and discussions.
             </p>
-        <ol class="m-5">
-            <li>Choose Your Lesson: Explore topics like dental health, mental wellness, cybersecurity, and more.</li>
-            <li>Debate Forty: Engage in a guided discussion where Forty presents a weakly argued, incorrect opinion on the topic.</li>
-            <li>Challenge and Learn: Counter the argument using facts and reasoning. With each discussion, you’ll sharpen your ability to spot flawed logic and misinformation.</li>
-            <li>Reflect and Grow: Gain insights into common misinformation tactics and learn how to debunk them effectively in real life.</li>
+        <ol class="me-5">
+            <li><b>Debate Forty:</b> Engage in a guided discussion where Forty presents an flawed opinion on a topic.</li>
+            <li><b>Challenge and Learn:</b> With each discussion, you’ll sharpen your ability to spot flawed logic and misinformation.</li>
+            <li><b>Various Subjects:</b> Explore topics like dental health, mental wellness, cybersecurity, and more.</li>
         </ol>
         </div>
         <div class="col-md-4"> 
             <img src="{{ url_for('static', filename='img/forty.png') }}" height="256px">
             <br>
-            <a href="/signin" class="btn btn-primary btn-lg m-5">Get Started</a>
+            <a href="/signup" class="btn btn-primary btn-lg m-5">Get Started</a>
         </div>
 
     </div>
@@ -96,14 +104,14 @@
  
    
     <!-- Topics Grid -->
-<div class="container mt-5">
+<div class="container mt-1">
     <div class="row text-center">
         
         <!-- Medicine Topic -->
         <div class="col-md-3 mb-4">
             <div class="list-group">
-                <img src="{{ url_for('static', filename='img/medicine.png') }}" class="img-fluid mb-3 d-block mx-auto" alt="Medicine" style="max-width: 120px; height: auto;">
-                <h5 class="list-group-item active">Medicine</h5>
+                <img src="{{ url_for('static', filename='img/medicine.png') }}" class="img-fluid mb-3 d-block mx-auto" alt="Medicine" style="max-height: 100px; height: auto;">
+                <h5 class="">Medicine</h5>
                 <p class="list-group-item">Learn about dental health, proper brushing habits, and common oral care misconceptions.</p>
             </div>
         </div>
@@ -111,8 +119,8 @@
         <!-- Nature Topic -->
         <div class="col-md-3 mb-4">
             <div class="list-group">
-                <img src="{{ url_for('static', filename='img/nature.png') }}" class="img-fluid mb-3 d-block mx-auto" alt="Nature" style="max-width: 120px; height: auto;">
-                <h5 class="list-group-item active">Nature</h5>
+                <img src="{{ url_for('static', filename='img/nature.png') }}" class="img-fluid mb-3 d-block mx-auto" alt="Nature" style="max-height: 100px; height: auto;">
+                <h5 class="">Nature</h5>
                 <p class="list-group-item">Explore conservation, wildlife protection, and sustainable practices for the future.</p>
             </div>
         </div>
@@ -120,8 +128,8 @@
         <!-- Self-Care Topic -->
         <div class="col-md-3 mb-4">
             <div class="list-group">
-                <img src="{{ url_for('static', filename='img/selfcare.png') }}" class="img-fluid mb-3 d-block mx-auto" alt="Self-Care" style="max-width: 120px; height: auto;">
-                <h5 class="list-group-item active">Self-Care</h5>
+                <img src="{{ url_for('static', filename='img/selfcare.png') }}" class="img-fluid mb-3 d-block mx-auto" alt="Self-Care" style="max-height: 100px; height: auto;">
+                <h5 class="">Self-Care</h5>
                 <p class="list-group-item">Focus on mental wellness, stress reduction, and emotional balance.</p>
             </div>
         </div>
@@ -129,15 +137,28 @@
         <!-- Technology Topic -->
         <div class="col-md-3 mb-4">
             <div class="list-group">
-                <img src="{{ url_for('static', filename='img/technology.png') }}" class="img-fluid mb-3 d-block mx-auto" alt="Technology" style="max-width: 120px; height: auto;">
-                <h5 class="list-group-item active">Technology</h5>
+                <img src="{{ url_for('static', filename='img/technology.png') }}" class="img-fluid mb-3 d-block mx-auto" alt="Technology" style="max-height: 100px; height: auto;">
+                <h5 class="">Technology</h5>
                 <p class="list-group-item">Discover AI, machine learning, cybersecurity, and emerging tech trends.</p>
             </div>
         </div>
-
     </div>
 </div>
+        <div class="text-center card mb-5">
+             <div class="card-body">
+                
+                   <div class="row">
+                    <div class="col-6 align-content-center"><p>
+                        MindFort is part of an experiment conducted by researchers at University of Oulu and The University of Tokyo. <br> Read more about our mission <a href="about">here</a>.
+                      </p></div>
+                    <div class="col-3"> <img style="max-height: 120px; height: auto;" src="{{ url_for('static', filename='img/uoulu.jpg') }}">
+                       </div>
+                    <div class="col-3"> <img style="max-height: 120px; height: auto;" src="{{ url_for('static', filename='img/utokyo.png') }}"></div>
+                   </div>
+             </div>
+        </div>
 
+       
 </div>
 
             
