@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'includes/head.html' %}
+<body class="d-flex flex-column min-vh-100">
+    {% include 'includes/navbar.html' %}
+    {% include 'includes/messages.html' %}
+    <div class="container-lg pt-5" style="min-height: 50vh;">
+        <div class="table-responsive " style="min-height: 50vh;">
+            <table class="table table-sm table-striped table-hover ">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Progress</th>
+                        <th>Lesson Cases</th>
+                        <th>Lessons Order</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>Level {{ user.level + 1 }}, Stage {{ user.lesson_state + 1 }}</td>
+                        <td>{{ user.lesson_cases }}</td>
+                        <td>{{ user.lessons_order }}</td>
+
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Options
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="/view_user?id={{ user.id }}">
+                                            View User Data
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/reset_account?id={{ user.id }}" onclick="return confirm('Are you sure you want to reset this account?');">
+                                            Reset Account
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/delete_account?id={{ user.id }}" onclick="return confirm('Are you sure you want to delete this account? This action cannot be undone.');">
+                                            Delete Account
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% include 'includes/footer.html' %}
+</body>
+<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</html>

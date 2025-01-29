@@ -170,6 +170,102 @@ def index():
         session_id = get_session_id(),
         version = VERSION,
         current_path=request.path)
+    
+@app.route('/admin')
+def admin():
+    
+    if session.get('user.email'):
+        if session.get('user.email') in ['daniel.szabo@oulu.fi']:
+            return render_template('admin.html', 
+                users = get_users_from_db(),
+                session_id = get_session_id(),
+                version = VERSION,
+                current_path=request.path)
+    
+    return redirect(url_for('index'))
+        
+
+@app.route('/prolific_login', methods=['GET'])
+def prolific_login():
+    username = request.args.get('PROLIFIC_PID')
+    
+    # try logging in first
+    conn = get_db_connection()
+    user = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+    conn.close()
+
+    if user:
+        session['user.id'] = user['id']
+        session['user.username'] = user['username']
+        session['user.email'] =  user['email']
+        session['user.first_name'] =  user['first_name']
+        session['user.last_name'] = user['last_name']
+        session['user.level'] = user['level']
+        session['user.lesson_state'] = user['lesson_state']
+        session['user.lessons_order'] = user['lessons_order']
+        session['user.lesson_cases'] = user['lesson_cases'].split(',')
+        session['user.age'] = user['age']
+        session['user.gender'] = user['gender']
+        session['user.country'] = user['country']
+        flash('Signed in successfully!', 'success')
+        return redirect(url_for('index'))
+    else:
+           
+        first_name = "Participant " + username
+
+        # Get signup datetime and IP
+        signup_datetime = datetime.utcnow()
+        user_ip = request.remote_addr
+
+        # Generate lesson order
+        lessons = list(range(12))  # Lessons ID 0 to 11
+        random.shuffle(lessons)  # Shuffle lessons
+        # Convert lesson order to string for storage
+        lesson_order_str = ','.join(map(str, lessons))
+
+        # Generate lesson cases
+        lesson_cases = [random.randint(0, 3) for _ in range(12)]
+        lesson_cases_str = ','.join(map(str, lesson_cases))
+
+        try:
+            conn = get_db_connection()
+            conn.execute("""
+                INSERT INTO users (first_name, last_name, username, age, gender, country, email, password, level, lesson_state, signup_datetime, ip, lessons_order, lesson_cases)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                         (first_name, '', username, '', '', '', username, '', 0, 0, signup_datetime, user_ip, lesson_order_str, lesson_cases_str))
+            conn.commit()
+            conn.close()
+            
+            flash('Account created successfully!', 'success')
+
+            # Sign user in automatically
+            conn = get_db_connection()
+            user = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+            conn.close()
+
+            if user:
+                session['user.id'] = user['id']
+                session['user.username'] = user['username']
+                session['user.email'] =  user['email']
+                session['user.first_name'] =  user['first_name']
+                session['user.last_name'] = user['last_name']
+                session['user.level'] = user['level']
+                session['user.lesson_state'] = user['lesson_state']
+                session['user.lessons_order'] = user['lessons_order']
+                session['user.lesson_cases'] = user['lesson_cases'].split(',')
+                session['user.age'] = user['age']
+                session['user.gender'] = user['gender']
+                session['user.country'] = user['country']
+                return redirect(url_for('index'))
+            else:
+                return redirect(url_for('signin'))
+        
+        except sqlite3.IntegrityError as e :
+            flash(f'Username or email is already registered. ({e})', 'danger')
+            return render_template('signup.html',
+                                   session_id=get_session_id(),
+                                   version=VERSION,
+                                   current_path=request.path)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -254,6 +350,7 @@ def signup():
                            session_id=get_session_id(),
                            version=VERSION,
                            current_path=request.path)
+    
 @app.route('/signin', methods=['GET', 'POST'])
 def signin():
     if request.method == 'POST':
@@ -428,6 +525,38 @@ def get_messages_from_db(user_id, lesson_id):
 
     return messages
 
+def get_users_from_db():
+    
+    
+    users = []
+    with sqlite3.connect(DATABASE) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT *
+            FROM users
+        """, ())
+        
+        rows = cursor.fetchall()
+
+        for row in rows:
+            users.append({
+                "id": row[0],
+                "level": row[1],
+                "lesson_state": row[2],
+                "first_name": row[3],
+                "last_name": row[4],
+                "username": row[5],
+                "age": row[6],
+                "gender": row[7],
+                "country": row[8],
+                "lesson_cases": row[9],
+                "signup_datetime": row[10],
+                "ip": row[11],
+                "lessons_order": row[12],
+                "email": row[13],
+            })
+            
+    return users
 
 def get_message_from_db_by_id(id):
     

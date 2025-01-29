@@ -8,10 +8,10 @@
 
     {% include 'includes/messages.html' %}
 
-    <div class="container-lg" style="min-height: 600px;">
+    <div class="container-lg mb-5" style="min-height: 600px;">
         <div class="row d-flex pt-3 justify-content-center">
-            <div class="col-md-10 col-lg-8 col-xl-6"">
-                <a type=" button" href="/" class="btn btn-primary btn-sm mb-5">Back to topics</a>
+            <div class="col-md-10 col-lg-8 col-xl-6">
+                <a href="/" class="btn btn-link btn-sm mb-5">Back to topics</a>
 
                 <h1>
                     <b>{{ topic|capitalize }} Lesson {{ lesson.id + 1 }}</b>
@@ -263,7 +263,7 @@
                 Your conversation will be anonymised and analysed by scientists, unless you opt out.<br>Learn more <a
                     href="/dataprocessing">here</a>.
             </p>
-        </div>>
+        </div>
         {% endif %}
 
         {% endif %}
