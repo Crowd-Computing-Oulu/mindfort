@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'includes/head.html' %}
+
+<body class="d-flex flex-column min-vh-100">
+ 
+    {% include 'includes/navbar.html' %}
+
+    {% include 'includes/messages.html' %}
+
+
+    <div class="container-sm">
+        <h1>Privacy Statement</h1>
+    
+        <b>1. Introduction</b>
+        <p>The University of Oulu (hereafter ‘the University’) and Daniel Szabo (hereafter ‘the Developer‘) are committed to protecting your personal data and respecting your privacy. We collect and process personal data in accordance with the GDPR and other relevant legislation.</p>
+    
+        <b>2. Why and How Do We Process Your Personal Data?</b>
+        <p>We process your usage data to facilitate our research regarding human-artificial intelligence interaction. Your data is anonymised before analysis and is only shared with researchers from the University of Oulu and The University of Tokyo directly involved with this project.</p>
+    
+        <b>3. Legal Basis for Processing</b>
+        <p>Processing your personal data is necessary for the research tasks carried out in the public interest, compliance with legal obligations, or legitimate interests pursued by the University.</p>
+    
+        <b>4. What Personal Data Do We Collect?</b>
+        <p>The specific data collected depends on your interaction with our services. You may use the service completely anonymously. If you share personal information, we anonymise your data before sharing with third parties or analysis.</p>
+    
+        <b>5. How Long Do We Keep Your Personal Data?</b>
+        <p>Personal data is retained only as long as necessary to achieve the purpose for which it was collected, or to comply with legal obligations.</p>
+    
+        <b>6. How Do We Protect Your Personal Data?</b>
+        <p>We keep your data on only physically and digitally secure servers during collection and after collection during analysis.</p>
+    
+        <b>7. Access to Your Personal Data</b>
+        <p>Access to your personal data is restricted to individuals authorised by the Developer. We do not share your data with third parties except as outlined in our privacy notice or required by law.</p>
+    
+        <b>8. Your Rights</b>
+        <p>Under the GDPR, you have the right to access, rectify, or erase your personal data, and to restrict or object to its processing. You can exercise these rights by contacting the University's Data Protection Officer.</p>
+    
+        <b>9. Contact Information</b>
+        <p>For questions, concerns, or exercising your privacy rights, please contact:</p>
+        <address>
+            Daniel Szabo<br>
+            University of Oulu<br>
+            Pentti Kaiteran katu 1<br>
+            Oulu 90570<br>
+            Finland<br>
+            daniel.szabo [at] oulu.fi
+        </address>
+    
+        <b>10. More Information</b>
+        <p>For further information about our data protection policies, visit <a href="https://www.oulu.fi/en/privacy">our privacy page</a>.</p>
+    
+    </div>
+    {% include 'includes/footer.html' %}
+
+</body>
+
+<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
+</html>

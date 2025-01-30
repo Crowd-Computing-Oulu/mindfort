@@ -86,6 +86,18 @@ def init_db():
             )
             """)
             
+        # Ensure stage_finished table exists
+        if not table_exists(conn, "stage_finished"):
+            print("Creating 'stage_finished' table...")
+            conn.execute("""
+            CREATE TABLE stage_finished (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                lesson_id INTEGER NOT NULL,
+                stage_finished INTEGER NOT NULL,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+            """)
+            
         # Ensure likert_pre table exists
         if not table_exists(conn, "likert_pre"):
             print("Creating 'likert_pre' table...")
@@ -164,7 +176,6 @@ def index():
         for i in range (0, len(lessons)):
             lessons_ordered_for_user[i] = get_lesson_by_id_with_ordering(i, session['user.lessons_order'])
     
-    print(lessons_ordered_for_user)
     return render_template('index.html', 
         lessons = lessons_ordered_for_user,
         session_id = get_session_id(),
@@ -173,7 +184,6 @@ def index():
     
 @app.route('/admin')
 def admin():
-    
     if session.get('user.email'):
         if session.get('user.email') in ['daniel.szabo@oulu.fi']:
             return render_template('admin.html', 
@@ -424,10 +434,27 @@ def likert(version,lesson_id):
     conn.commit()
     conn.close()
     
+    try:
+        conn = get_db_connection()
+        with conn:
+            # get current stage
+            stage_finished = conn.execute(
+                "SELECT lesson_state FROM users WHERE id = ?",
+                (user_id,)
+            ).fetchone()["lesson_state"]
+            # log time
+            conn.execute("INSERT INTO stage_finished (lesson_id, stage_finished) VALUES (?, ?)", (lesson_id, stage_finished))
+    except Exception as e:
+        flash(f'An error occurred: {e}', 'error')
+    finally:
+        conn.close()
+    
     if(session['user.lesson_state'] == 4):
+              
         try:
             conn = get_db_connection()
             with conn:
+               
                 # Increment the user's lesson_state in the database
                 conn.execute(
                     "UPDATE users SET lesson_state = 0 WHERE id = ?",
@@ -595,11 +622,24 @@ def finish_conv():
     try:
         conn = get_db_connection()
         with conn:
+            
+             # get current stage
+            stage_finished = conn.execute(
+                "SELECT lesson_state FROM users WHERE id = ?",
+                (user_id,)
+            ).fetchone()["lesson_state"]
+            
+            # log time
+            conn.execute("INSERT INTO stage_finished (lesson_id, stage_finished) VALUES (?, ?)", (lesson_id, stage_finished))
+            
             # Increment the user's lesson_state in the database
             conn.execute(
                 "UPDATE users SET lesson_state = lesson_state + 1 WHERE id = ?",
                 (user_id,)
             )
+            
+            
+            
             # Update the session to reflect the new lesson_state
             user_level = conn.execute(
                 "SELECT lesson_state FROM users WHERE id = ?",
@@ -628,18 +668,31 @@ def finish_stage():
     try:
         conn = get_db_connection()
         with conn:
+            
+             # get current stage
+            stage_finished = conn.execute(
+                "SELECT lesson_state FROM users WHERE id = ?",
+                (user_id,)
+            ).fetchone()["lesson_state"]
+            
+            print(stage_finished)
+            
+            # log time
+            conn.execute("INSERT INTO stage_finished (lesson_id, stage_finished) VALUES (?, ?)", (lesson_id, stage_finished))
+            
             # Increment the user's lesson_state in the database
             conn.execute(
                 "UPDATE users SET lesson_state = lesson_state + 1 WHERE id = ?",
                 (user_id,)
             )
+
             # Update the session to reflect the new lesson_state
             user_level = conn.execute(
                 "SELECT lesson_state FROM users WHERE id = ?",
                 (user_id,)
             ).fetchone()
             session['user.lesson_state'] = user_level[0] if user_level else session.get('lesson_state', 0)
-
+     
         flash('Stage finished. On to the next lesson stage.', 'success')
     except Exception as e:
         flash(f'An error occurred: {e}', 'error')
@@ -668,6 +721,13 @@ def terms():
         version = VERSION,
         current_path=request.path)
     
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy.html',
+        session_id = get_session_id(),
+        version = VERSION,
+        current_path=request.path)
+    
 @app.route('/about')
 def about():
     return render_template('about.html',
@@ -691,7 +751,7 @@ def feedback():
             cur = conn.cursor()
             cur.execute("INSERT INTO feedback (message_id, content) VALUES (?, ?)", (message_id, feedback_content))
             conn.commit()
-
+            
         flash("Feedback submitted successfully.", "success")
         message = get_message_from_db_by_id(message_id)
         return redirect(url_for('lesson', id=message['lesson_id']))
@@ -719,7 +779,7 @@ def dataprocessing():
         session_id = get_session_id(),
         version = VERSION,
         current_path=request.path)
-
+        
 @app.route('/delete_account')
 def delete_user_account():
     try:

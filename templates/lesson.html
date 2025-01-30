@@ -52,10 +52,9 @@
             </div>
             {% if lesson_state == 0 %}
             <form method="POST" action="/likert/pre/{{ lesson.id }}">
-                <p style="font-size: 1.2em;" class="mb-3 mt-5">
-                    How certain are you about the following?
+                <p style="font-size: 1.2em;" class="mb-5 mt-5">
+                    What do you think about the following statement?
                 </p>
-
                 <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
                     <span
                         style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
@@ -63,24 +62,90 @@
                     <span
                         style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
                 </p>
-
-                <div class="mt-4">
-                    <!-- <label for="likert-scale">How much do you agree with the statement above?</label><br> -->
-                    <input type="range" style="border: none; box-shadow: none;" class="form-range m-3" id="likert-scale"
-                        name="likert_scale" min="1" max="7" step="1" required>
-                    <div class="d-flex justify-content-between">
-                        <span>Extremely Uncertain</span>
-                        <span>Extremely Certain</span>
+                <div class="mt-5">
+                    <style>
+                        .scale-container {
+                            position: relative;
+                            width: 98%;
+                            margin-top: 20px;
+                            margin-left: 5px;
+                        }
+                        .scale-markers {
+                            position: absolute;
+                            width: 100%;
+                            top: -10px;
+                            left: 0;
+                            height: 20px;
+                        }
+                        .scale-markers::before {
+                            content: '';
+                            position: absolute;
+                            left: 0;
+                            right: 0;
+                            border-top: 2px solid #000;
+                            top: 50%;
+                            z-index: 1;
+                        }
+                        .scale-marker {
+                            position: absolute;
+                            top: 0;
+                            width: 2px;
+                            background-color: rgb(0, 0, 0);
+                            z-index: 2;
+                        }
+                        .marker-label {
+                            font-size: 0.75rem;
+                            text-align: center;
+                        }
+                        /* Define different heights for the markers */
+                        .scale-marker:nth-child(1),
+                        .scale-marker:nth-child(4),
+                        .scale-marker:nth-child(7),
+                        .scale-marker:nth-child(10),
+                        .scale-marker:nth-child(13),
+                        .scale-marker:nth-child(16) {
+                            height: 40px; /* Longer markers */
+                            width: 3px;
+                        }
+                        .scale-marker:not(:nth-child(1)):not(:nth-child(4)):not(:nth-child(7)):not(:nth-child(10)):not(:nth-child(13)):not(:nth-child(16)) {
+                            height: 20px; /* Regular markers */
+                        }
+                    </style>
+                    <input type="range" style="border: none; box-shadow: none; margin-left: 20px; width: 94%; margin-bottom: -15px;" class="form-range" id="belief-scale"
+                           name="likert_scale" min="1" max="15" step="1" required>
+                    <div class="scale-container">
+                        <div class="scale-markers">
+                            <!-- Create one scale marker for each position from 0 to 14 to show snap points -->
+                            <div class="scale-marker" style="left: 0%;"></div>
+                            <div class="scale-marker" style="left: 6.67%;"></div>
+                            <div class="scale-marker" style="left: 13.33%;"></div>
+                            <div class="scale-marker" style="left: 20%;"></div>
+                            <div class="scale-marker" style="left: 26.67%;"></div>
+                            <div class="scale-marker" style="left: 33.33%;"></div>
+                            <div class="scale-marker" style="left: 40%;"></div>
+                            <div class="scale-marker" style="left: 46.67%;"></div>
+                            <div class="scale-marker" style="left: 53.33%;"></div>
+                            <div class="scale-marker" style="left: 60%;"></div>
+                            <div class="scale-marker" style="left: 66.67%;"></div>
+                            <div class="scale-marker" style="left: 73.33%;"></div>
+                            <div class="scale-marker" style="left: 80%;"></div>
+                            <div class="scale-marker" style="left: 86.67%;"></div>
+                            <div class="scale-marker" style="left: 93.33%;"></div>
+                            <div class="scale-marker" style="left: 100%;"></div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-5" style="margin-left: 35px; margin-right: 35px;">
+                        <span class="marker-label">Definitely<br> FALSE</span>
+                        <span class="marker-label">Probably<br> FALSE</span>
+                        <span class="marker-label">Uncertain</span>
+                        <span class="marker-label">Probably<br> TRUE</span>
+                        <span class="marker-label">Definitely <br>TRUE</span>
                     </div>
                 </div>
-
-
                 <div class="text-center">
                     <button type="submit" class="btn btn-primary mt-5">Submit</button>
                 </div>
-
             </form>
-
             {% endif %}
             {% if lesson_state == 1 %}
             {% if session['user.lesson_cases'][lesson.id] == '0' %}
@@ -93,7 +158,9 @@
                 </div>
             {% endif %}
             {% if session['user.lesson_cases'][lesson.id] == '1' %}
-                In this lesson, you will be shown an argument essay.
+                <p>
+                    Please read the following essay carefully and answer the questions below.
+                </p>
 
                 <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
                     <span
@@ -106,9 +173,34 @@
                 <div class="text-center">
                     <form action="/finish_stage" method="POST">
                         <input type="hidden" name="id" value="{{lesson.id}}">
-                        <button type="submit" class="btn btn-primary mt-5">Continue</button>
+                        <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2" disabled>Continue (5:00)</button>
+                        <p class="small">Please read the text carefully for at least five minutes before continuing.</p>
                     </form>
                 </div>
+                
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var button = document.getElementById('continueButton');
+                        var countdownTime = 5 * 60; // 5 minutes in seconds
+                
+                        // Disable the button initially
+                        button.disabled = true;
+                
+                        var timer = setInterval(function () {
+                            if (countdownTime <= 0) {
+                                clearInterval(timer);
+                                button.disabled = false;
+                                button.textContent = 'Continue';
+                            } else {
+                                countdownTime--;
+                                // Format the remaining time
+                                var minutes = Math.floor(countdownTime / 60);
+                                var seconds = countdownTime % 60;
+                                button.textContent = 'Continue (' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds + ')';
+                            }
+                        }, 1000); // Timer intervals every second
+                    });
+                </script>
             {% endif %}
             {% if session['user.lesson_cases'][lesson.id] == '2' %}
             <div class="text-center">
@@ -129,7 +221,36 @@
                         <textarea id="essaycontent" placeholder="Type your argument here..." class="form-control" name="content" rows="10" oninput="updateCharacterCount()"></textarea>
                         <div id="charCount" class="mt-2">0/200 characters</div>
                     </div>
-                    <button type="submit" class="btn btn-primary mt-5" id="submitBtn" disabled>Submit</button>
+                    <div class="text-center">
+                        <form action="/finish_stage" method="POST">
+                            <input type="hidden" name="id" value="{{lesson.id}}">
+                            <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2" disabled>Submit (5:00)</button>
+                        </form>
+                    </div>
+                    
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            var button = document.getElementById('continueButton');
+                            var countdownTime = 5 * 60; // 5 minutes in seconds
+                    
+                            // Disable the button initially
+                            button.disabled = true;
+                    
+                            var timer = setInterval(function () {
+                                if (countdownTime <= 0) {
+                                    clearInterval(timer);
+                                    button.disabled = false;
+                                    button.textContent = 'Continue';
+                                } else {
+                                    countdownTime--;
+                                    // Format the remaining time
+                                    var minutes = Math.floor(countdownTime / 60);
+                                    var seconds = countdownTime % 60;
+                                    button.textContent = 'Continue (' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds + ')';
+                                }
+                            }, 1000); // Timer intervals every second
+                        });
+                    </script>
                 </form>
             </div>
             
@@ -237,10 +358,35 @@
                 </div>
                 <div class="card-footer text-muted d-flex justify-content-between align-items-center p-0">
                     <div>
-                        <a class="btn btn-outline-success btn-sm m-2" href="/finish_conv?id={{ lesson.id }}">
-                            Finish conversation
-                        </a>
+                        <form action="/finish_conv?id={{ lesson.id }}" method="GET">
+                            <input type="hidden" name="id" value="{{lesson.id}}">
+                            <button id="finishConvButton" disabled class="btn btn-outline-success btn-sm m-2"disabled><nobr>Continue (10:00)</nobr></button>
+                        </form>
                     </div>
+                    <p class="small mt-3 ms-3 me-3">Please converse with Forty for at least ten minutes before continuing.</p>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            var button = document.getElementById('finishConvButton');
+                            var countdownTime = 10 * 60; // 5 minutes in seconds
+                    
+                            // Disable the button initially
+                            button.disabled = true;
+                    
+                            var timer = setInterval(function () {
+                                if (countdownTime <= 0) {
+                                    clearInterval(timer);
+                                    button.disabled = false;
+                                    button.textContent = 'Continue';
+                                } else {
+                                    countdownTime--;
+                                    // Format the remaining time
+                                    var minutes = Math.floor(countdownTime / 60);
+                                    var seconds = countdownTime % 60;
+                                    button.innerHTML = '<nobr>Continue (' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds + ')</nobr>';
+                                }
+                            }, 1000); // Timer intervals every second
+                        });
+                    </script>
                 </div>
                 {% else %}
                 <div class=" disabled card-footer text-muted d-flex justify-content-start align-items-center p-3">
@@ -253,7 +399,7 @@
                 <div class="card-footer text-muted d-flex justify-content-between align-items-center p-0">
                     <div>
                         <a disabled class="btn disabled btn-outline-success btn-sm m-2">
-                            Finish conversation
+                            Continue
                         </a>
                     </div>
                 </div>
@@ -269,32 +415,99 @@
         {% endif %}
         {% if lesson_state == 2 %}
         <form method="POST" action="/likert/mid/{{ lesson.id }}">
-            <p style="font-size: 1.2em;" class="mb-3 mt-5">
-                How certain are you about the following?
+            <p style="font-size: 1.2em;" class="mb-5 mt-5">
+                What do you think about the following statement?
             </p>
-
             <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
-                            <span
-                                style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
-                            <span class="m-5">{{ lesson.truth }}</span>
-                            <span
-                                style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
-                        </p>
-            <div class="mt-4">
-                <!-- <label for="likert-scale">How much do you agree with the statement above?</label><br> -->
-                <input type="range" style="border: none; box-shadow: none;" class="form-range m-3" id="likert-scale"
-                    name="likert_scale" min="1" max="7" step="1" required>
-                <div class="d-flex justify-content-between">
-                    <span>Extremely Uncertain</span>
-                    <span>Extremely Certain</span>
+                <span
+                    style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
+                <span class="m-5">{{ lesson.truth }}</span>
+                <span
+                    style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
+            </p>
+            <div class="mt-5">
+                <style>
+                    .scale-container {
+                        position: relative;
+                        width: 98%;
+                        margin-top: 20px;
+                        margin-left: 5px;
+                    }
+                    .scale-markers {
+                        position: absolute;
+                        width: 100%;
+                        top: -10px;
+                        left: 0;
+                        height: 20px;
+                    }
+                    .scale-markers::before {
+                        content: '';
+                        position: absolute;
+                        left: 0;
+                        right: 0;
+                        border-top: 2px solid #000;
+                        top: 50%;
+                        z-index: 1;
+                    }
+                    .scale-marker {
+                        position: absolute;
+                        top: 0;
+                        width: 2px;
+                        background-color: rgb(0, 0, 0);
+                        z-index: 2;
+                    }
+                    .marker-label {
+                        font-size: 0.75rem;
+                        text-align: center;
+                    }
+                    /* Define different heights for the markers */
+                    .scale-marker:nth-child(1),
+                    .scale-marker:nth-child(4),
+                    .scale-marker:nth-child(7),
+                    .scale-marker:nth-child(10),
+                    .scale-marker:nth-child(13),
+                    .scale-marker:nth-child(16) {
+                        height: 40px; /* Longer markers */
+                        width: 3px;
+                    }
+                    .scale-marker:not(:nth-child(1)):not(:nth-child(4)):not(:nth-child(7)):not(:nth-child(10)):not(:nth-child(13)):not(:nth-child(16)) {
+                        height: 20px; /* Regular markers */
+                    }
+                </style>
+                <input type="range" style="border: none; box-shadow: none; margin-left: 20px; width: 94%; margin-bottom: -15px;" class="form-range" id="belief-scale"
+                       name="likert_scale" min="1" max="15" step="1" required>
+                <div class="scale-container">
+                    <div class="scale-markers">
+                        <!-- Create one scale marker for each position from 0 to 14 to show snap points -->
+                        <div class="scale-marker" style="left: 0%;"></div>
+                        <div class="scale-marker" style="left: 6.67%;"></div>
+                        <div class="scale-marker" style="left: 13.33%;"></div>
+                        <div class="scale-marker" style="left: 20%;"></div>
+                        <div class="scale-marker" style="left: 26.67%;"></div>
+                        <div class="scale-marker" style="left: 33.33%;"></div>
+                        <div class="scale-marker" style="left: 40%;"></div>
+                        <div class="scale-marker" style="left: 46.67%;"></div>
+                        <div class="scale-marker" style="left: 53.33%;"></div>
+                        <div class="scale-marker" style="left: 60%;"></div>
+                        <div class="scale-marker" style="left: 66.67%;"></div>
+                        <div class="scale-marker" style="left: 73.33%;"></div>
+                        <div class="scale-marker" style="left: 80%;"></div>
+                        <div class="scale-marker" style="left: 86.67%;"></div>
+                        <div class="scale-marker" style="left: 93.33%;"></div>
+                        <div class="scale-marker" style="left: 100%;"></div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between mt-5" style="margin-left: 35px; margin-right: 35px;">
+                    <span class="marker-label">Definitely<br> FALSE</span>
+                    <span class="marker-label">Probably<br> FALSE</span>
+                    <span class="marker-label">Uncertain</span>
+                    <span class="marker-label">Probably<br> TRUE</span>
+                    <span class="marker-label">Definitely <br>TRUE</span>
                 </div>
             </div>
-
-
             <div class="text-center">
                 <button type="submit" class="btn btn-primary mt-5">Submit</button>
             </div>
-
         </form>
 
         {% endif %}
@@ -312,19 +525,45 @@
         </p>
 
         <div class="text-center">
-            <form action="/finish_stage" method="POST">
-                <input type="hidden" name="id" value="{{lesson.id}}">
-                <button type="submit" class="btn btn-primary mt-5">Continue</button>
-            </form>
+            <div class="text-center">
+                <form action="/finish_stage" method="POST">
+                    <input type="hidden" name="id" value="{{lesson.id}}">
+                    <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2" disabled>Continue (5:00)</button>
+                    <p class="small">Please read the text carefully for at least five minutes before continuing.</p>
+                </form>
+            </div>
+            
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    var button = document.getElementById('continueButton');
+                    var countdownTime = 5 * 60; // 5 minutes in seconds
+            
+                    // Disable the button initially
+                    button.disabled = true;
+            
+                    var timer = setInterval(function () {
+                        if (countdownTime <= 0) {
+                            clearInterval(timer);
+                            button.disabled = false;
+                            button.textContent = 'Continue';
+                        } else {
+                            countdownTime--;
+                            // Format the remaining time
+                            var minutes = Math.floor(countdownTime / 60);
+                            var seconds = countdownTime % 60;
+                            button.textContent = 'Continue (' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds + ')';
+                        }
+                    }, 1000); // Timer intervals every second
+                });
+            </script>
         </div>
 
         {% endif %}
         {% if lesson_state == 4 %}
         <form method="POST" action="/likert/post/{{ lesson.id }}">
-            <p style="font-size: 1.2em;" class="mb-3 mt-5">
-                How certain are you about the following?
+            <p style="font-size: 1.2em;" class="mb-5 mt-5">
+                What do you think about the following statement?
             </p>
-
             <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
                 <span
                     style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
@@ -332,22 +571,89 @@
                 <span
                     style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
             </p>
-
-            <div class="mt-4">
-                <!-- <label for="likert-scale">How much do you agree with the statement above?</label><br> -->
-                <input type="range" style="border: none; box-shadow: none;" class="form-range m-3" id="likert-scale"
-                    name="likert_scale" min="1" max="7" step="1" required>
-                <div class="d-flex justify-content-between">
-                    <span>Extremely Uncertain</span>
-                    <span>Extremely Certain</span>
+            <div class="mt-5">
+                <style>
+                    .scale-container {
+                        position: relative;
+                        width: 98%;
+                        margin-top: 20px;
+                        margin-left: 5px;
+                    }
+                    .scale-markers {
+                        position: absolute;
+                        width: 100%;
+                        top: -10px;
+                        left: 0;
+                        height: 20px;
+                    }
+                    .scale-markers::before {
+                        content: '';
+                        position: absolute;
+                        left: 0;
+                        right: 0;
+                        border-top: 2px solid #000;
+                        top: 50%;
+                        z-index: 1;
+                    }
+                    .scale-marker {
+                        position: absolute;
+                        top: 0;
+                        width: 2px;
+                        background-color: rgb(0, 0, 0);
+                        z-index: 2;
+                    }
+                    .marker-label {
+                        font-size: 0.75rem;
+                        text-align: center;
+                    }
+                    /* Define different heights for the markers */
+                    .scale-marker:nth-child(1),
+                    .scale-marker:nth-child(4),
+                    .scale-marker:nth-child(7),
+                    .scale-marker:nth-child(10),
+                    .scale-marker:nth-child(13),
+                    .scale-marker:nth-child(16) {
+                        height: 40px; /* Longer markers */
+                        width: 3px;
+                    }
+                    .scale-marker:not(:nth-child(1)):not(:nth-child(4)):not(:nth-child(7)):not(:nth-child(10)):not(:nth-child(13)):not(:nth-child(16)) {
+                        height: 20px; /* Regular markers */
+                    }
+                </style>
+                <input type="range" style="border: none; box-shadow: none; margin-left: 20px; width: 94%; margin-bottom: -15px;" class="form-range" id="belief-scale"
+                       name="likert_scale" min="1" max="15" step="1" required>
+                <div class="scale-container">
+                    <div class="scale-markers">
+                        <!-- Create one scale marker for each position from 0 to 14 to show snap points -->
+                        <div class="scale-marker" style="left: 0%;"></div>
+                        <div class="scale-marker" style="left: 6.67%;"></div>
+                        <div class="scale-marker" style="left: 13.33%;"></div>
+                        <div class="scale-marker" style="left: 20%;"></div>
+                        <div class="scale-marker" style="left: 26.67%;"></div>
+                        <div class="scale-marker" style="left: 33.33%;"></div>
+                        <div class="scale-marker" style="left: 40%;"></div>
+                        <div class="scale-marker" style="left: 46.67%;"></div>
+                        <div class="scale-marker" style="left: 53.33%;"></div>
+                        <div class="scale-marker" style="left: 60%;"></div>
+                        <div class="scale-marker" style="left: 66.67%;"></div>
+                        <div class="scale-marker" style="left: 73.33%;"></div>
+                        <div class="scale-marker" style="left: 80%;"></div>
+                        <div class="scale-marker" style="left: 86.67%;"></div>
+                        <div class="scale-marker" style="left: 93.33%;"></div>
+                        <div class="scale-marker" style="left: 100%;"></div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between mt-5" style="margin-left: 35px; margin-right: 35px;">
+                    <span class="marker-label">Definitely<br> FALSE</span>
+                    <span class="marker-label">Probably<br> FALSE</span>
+                    <span class="marker-label">Uncertain</span>
+                    <span class="marker-label">Probably<br> TRUE</span>
+                    <span class="marker-label">Definitely <br>TRUE</span>
                 </div>
             </div>
-
-
             <div class="text-center">
                 <button type="submit" class="btn btn-primary mt-5">Submit</button>
             </div>
-
         </form>
         {% endif %}
     </div>
@@ -484,10 +790,11 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        padding-bottom: 3px;
     }
 
     .progress-dot.active {
-        background-color: blue;
+        background-color: rgb(13, 110, 253);
     }
 
     .progress-line {
@@ -497,7 +804,7 @@
     }
 
     .progress-line.active {
-        background-color: blue;
+        background-color: rgb(13, 110, 253);
     }
 </style>
 
