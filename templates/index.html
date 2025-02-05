@@ -30,37 +30,39 @@
 
                 <div class="d-flex flex-wrap">
                     {% for lesson_id, lesson_data in lessons.items() %}
-                    <div class="col-md-1 text-end">
-                        <img src="static/img/{{lesson_data['topic']}}.png" width="60px" class="mt-3 mb-3">
-                    </div>
                     <div class="col-3">
-                        <div class="p-2">
-                            {% if session['user.level'] > lesson_id %} 
-                            <a 
-                                class="btn btn-outline-success w-100 rounded-4 disabled" 
-                                >
-                                <img src="{{ url_for('static', filename='img/checkmark.circle.png') }}" class="mb-1  me-2" width="18">
-                                <b>{{ lesson_id + 1 }}</b> {{ lesson_data['title'] }}
-                            </a>
-                            {% elif session['user.level'] < lesson_id %} 
-                            <a 
-                                class="btn btn-outline-danger w-100 rounded-4 disabled" >
-                                <img src="{{ url_for('static', filename='img/lock.png') }}" class="mb-1  me-2" width="18">
-                                <b>{{ lesson_id+ 1  }}</b> {{ lesson_data['title'] }}
-                            </a>
-                            {% else %} 
-                            <a 
-                                href="{{ url_for('lesson', id=loop.index - 1) }}" 
-                                class="btn btn-primary w-100 rounded-4" >
-                                <b>{{lesson_id+ 1  }}</b> {{ lesson_data['title'] }}
-                            </a>
-                            <!-- Progress Bar -->
-                            <div class="progress mt-3" style="height: 15px;">
-                                <div class="progress-bar" role="progressbar" style="width: {{ (session['user.lesson_state']) * 20 }}%;" aria-valuenow="{{ session['user.lesson_state'] }}" aria-valuemin="" aria-valuemax="4">
+                        <div class="text-center">
+                            <img src="static/img/{{lesson_data['topic']}}.png" height="60px" class="mt-3 mb-3">
+                        </div>
+                        <div >
+                            <div class="p-2">
+                                {% if session['user.level'] > lesson_id %} 
+                                <a 
+                                    class="btn btn-outline-success w-100 rounded-4 disabled" 
+                                    >
+                                    <img src="{{ url_for('static', filename='img/checkmark.circle.png') }}" class="mb-1  me-2" width="18">
+                                    <b>{{ lesson_id + 1 }}</b> {{ lesson_data['title'] }}
+                                </a>
+                                {% elif session['user.level'] < lesson_id %} 
+                                <a 
+                                    class="btn btn-outline-danger w-100 rounded-4 disabled" >
+                                    <img src="{{ url_for('static', filename='img/lock.png') }}" class="mb-1  me-2" width="18">
+                                    <b>{{ lesson_id+ 1  }}</b> {{ lesson_data['title'] }}
+                                </a>
+                                {% else %} 
+                                <a 
+                                    href="{{ url_for('lesson', id=loop.index - 1) }}" 
+                                    class="btn btn-primary w-100 rounded-4" >
+                                    <b>{{lesson_id+ 1  }}</b> {{ lesson_data['title'] }}
+                                </a>
+                                <!-- Progress Bar -->
+                                <div class="progress mt-3" style="height: 15px;">
+                                    <div class="progress-bar" role="progressbar" style="width: {{ (session['user.lesson_state']) * 20 }}%;" aria-valuenow="{{ session['user.lesson_state'] }}" aria-valuemin="" aria-valuemax="4">
+                                    </div>
                                 </div>
+                                {% endif %} 
+                                
                             </div>
-                            {% endif %} 
-                            
                         </div>
                     </div>
                 {% endfor %}
@@ -68,6 +70,28 @@
                 </div>
                 </div>
             </div>
+
+            {% if session['user.level'] == 4 %} 
+            <div class="card m-5">
+                <div class="card-body">
+                    <h1>
+                        Congratulations! 🥳
+                    </h1>
+                    <p>
+                        You finished all the lessons. <b>
+                            Please read the below disclaimer before leaving!
+                        </b>
+                    </p>
+
+                    <p>
+                        This experiment was conducted to explore how individuals resist negative persuasion and reinforce their existing beliefs. Please be aware that in step four of each lesson, you were deliberately presented with incorrect and misleading information as part of the study's design. The purpose of this exercise was to simulate real-world scenarios where misinformation might be encountered and to observe how individuals defend against such persuasion. We assure you that the information provided in this step was not intended to change or undermine your original beliefs, which remain completely valid and supported.
+                    </p>
+                    <p>
+                        We appreciate your participation and remind you of the importance of critically evaluating all information you encounter, whether that be online or out in the real world.
+                    </p>
+                </div>
+            </div>
+            {% endif %} 
 
             <div class="m-5 text-center"> 
                 <img src="{{ url_for('static', filename='img/forty.png') }}" height="256px">

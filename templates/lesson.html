@@ -28,16 +28,13 @@
                     In this lesson, you will be shown an argument essay.
                     {% endif %}
                     {% if session['user.lesson_cases'][lesson.id] == '2' %}
-                    In this lesson, you will have to wriite an argument essay.
+                    In this lesson, you will have to write an argument essay.
                     {% endif %}
                     {% if session['user.lesson_cases'][lesson.id] == '3' %}
                     In this lesson, you will have to argue with Forty.
                     {% endif %}
 
                 </p>
-
-
-
                 <div class="d-flex justify-content-center mb-4">
                     {% for stage in range(0, 5) %}
                     <div class="d-flex align-items-center">
@@ -165,7 +162,7 @@
                 <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
                     <span
                         style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
-                    <span class="m-5">{{ lesson.refutation_essay }}</span>
+                    <span class="m-5">{{ lesson.refutation_essay | safe }}</span>
                     <span
                         style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
                 </p>
@@ -173,15 +170,15 @@
                 <div class="text-center">
                     <form action="/finish_stage" method="POST">
                         <input type="hidden" name="id" value="{{lesson.id}}">
-                        <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2" disabled>Continue (5:00)</button>
-                        <p class="small">Please read the text carefully for at least five minutes before continuing.</p>
+                        <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2" disabled>Continue (3:00)</button>
+                        <p class="small">Please read the text carefully for at least 3 minutes before continuing. The timer resets if you leave or reload this page.</p>
                     </form>
                 </div>
                 
                 <script>
                     document.addEventListener('DOMContentLoaded', function () {
                         var button = document.getElementById('continueButton');
-                        var countdownTime = 5 * 60; // 5 minutes in seconds
+                        var countdownTime = 3 * 60; // 5 minutes in seconds
                 
                         // Disable the button initially
                         button.disabled = true;
@@ -210,22 +207,31 @@
                         <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
                             <span
                                 style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
-                            <span class="m-5">{{ lesson.weakargument_written }}</span>
+                            <span class="m-5">{{ lesson.weakargument_written | safe }}</span>
                             <span
                                 style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
                         </p>
 
                         <label for="exampleFormControlTextarea1" class="form-label">
-                            Use online resources and your own reasoning to argue the statement above.
+                            Use any resource available to you and your own reasoning to argue each of the statements above, with one paragraph each.
                         </label>
-                        <textarea id="essaycontent" placeholder="Type your argument here..." class="form-control" name="content" rows="10" oninput="updateCharacterCount()"></textarea>
-                        <div id="charCount" class="mt-2">0/200 characters</div>
+                        <textarea id="essaycontent" placeholder="Type your argument here..." class="form-control" required name="content" rows="10" oninput="updateCharacterCount()"></textarea>
+                        <div id="charCount" class="mt-2">0/400 characters</div>
+                        
+                        <!-- TODO: add this back -->
+                        <!-- <label for="exampleFormControlTextarea1" class="form-label mt-4">
+                          Please briefly tell what resource(s) you used and how.
+                        </label>
+                        <textarea id="essaycontent" placeholder="Type your answer here..." class="form-control" required name="resources" rows="2" oninput="updateCharacterCount()"></textarea> -->
+
+                        
                     </div>
                     <div class="text-center">
                         <form action="/finish_stage" method="POST">
                             <input type="hidden" name="id" value="{{lesson.id}}">
-                            <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2" disabled>Submit (5:00)</button>
+                            <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2" disabled>Continue (5:00)</button>
                         </form>
+                        <p class="small mt-3 ms-3 me-3">Please work on this task for at least 5 minutes before continuing. The timer resets if you leave or reload this page.</p>
                     </div>
                     
                     <script>
@@ -261,9 +267,9 @@
                     const submitBtn = document.getElementById('submitBtn');
                     
                     const currentLength = textarea.value.length;
-                    charCount.textContent = `${currentLength}/200 characters`;
+                    charCount.textContent = `${currentLength}/400 characters`;
             
-                    if (currentLength >= 200) {
+                    if (currentLength >= 400) {
                         submitBtn.disabled = false;
                     } else {
                         submitBtn.disabled = true;
@@ -363,7 +369,7 @@
                             <button id="finishConvButton" disabled class="btn btn-outline-success btn-sm m-2"disabled><nobr>Continue (10:00)</nobr></button>
                         </form>
                     </div>
-                    <p class="small mt-3 ms-3 me-3">Please converse with Forty for at least ten minutes before continuing.</p>
+                    <p class="small mt-3 ms-3 me-3">Please converse with Forty for at least ten minutes before continuing, but no more than five minutes for each argument he presents. The timer resets if you leave or reload this page.</p>
                     <script>
                         document.addEventListener('DOMContentLoaded', function () {
                             var button = document.getElementById('finishConvButton');
@@ -519,7 +525,7 @@
         <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
             <span
                 style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
-            <span class="m-5">{{ lesson.strongargument_written }}</span>
+            <span class="m-5">{{ lesson.strongargument_written | safe }}</span>
             <span
                 style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
         </p>
@@ -528,15 +534,15 @@
             <div class="text-center">
                 <form action="/finish_stage" method="POST">
                     <input type="hidden" name="id" value="{{lesson.id}}">
-                    <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2" disabled>Continue (5:00)</button>
-                    <p class="small">Please read the text carefully for at least five minutes before continuing.</p>
+                    <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2" disabled>Continue (3:00)</button>
+                    <p class="small">Please read the text carefully for at least 3 minutes before continuing. The timer resets if you leave or reload this page.</p>
                 </form>
             </div>
             
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
                     var button = document.getElementById('continueButton');
-                    var countdownTime = 5 * 60; // 5 minutes in seconds
+                    var countdownTime = 3 * 60; // 5 minutes in seconds
             
                     // Disable the button initially
                     button.disabled = true;

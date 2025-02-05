@@ -10,7 +10,7 @@ import zipfile
 from io import BytesIO
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
-from lessons import get_lesson_by_id, lessons, get_lesson_by_id_with_ordering
+from lessons import get_lesson_by_id, lessons, get_lesson_by_id_with_ordering, get_lessons_number
 from chatgpt import process_message
 from datetime import datetime
 
@@ -19,7 +19,7 @@ app.logger.setLevel(logging.ERROR)
 app.secret_key = 'mindfort2024'
 
 DATABASE = 'database.db'
-VERSION = "v25.01.17 BETA"
+VERSION = "v25.02.06 BETA"
 
 def init_db():
     def table_exists(conn, table_name):
@@ -221,20 +221,21 @@ def prolific_login():
         return redirect(url_for('index'))
     else:
            
-        first_name = "Participant " + username
+        first_name = "Participant " + str(get_user_count() + 1)
 
         # Get signup datetime and IP
         signup_datetime = datetime.utcnow()
         user_ip = request.remote_addr
 
+
         # Generate lesson order
-        lessons = list(range(12))  # Lessons ID 0 to 11
-        random.shuffle(lessons)  # Shuffle lessons
+        lessons = range(0,4)
+        # random.shuffle(lessons)  # Shuffle lessons
         # Convert lesson order to string for storage
         lesson_order_str = ','.join(map(str, lessons))
 
         # Generate lesson cases
-        lesson_cases = [random.randint(0, 3) for _ in range(12)]
+        lesson_cases = balanced_latin_square(get_user_count() + 1)
         lesson_cases_str = ','.join(map(str, lesson_cases))
 
         try:
@@ -306,13 +307,13 @@ def signup():
         user_ip = request.remote_addr
 
         # Generate lesson order
-        lessons = list(range(12))  # Lessons ID 0 to 11
-        random.shuffle(lessons)  # Shuffle lessons
+        lessons = range(0,4)
+        # random.shuffle(lessons)  # Shuffle lessons
         # Convert lesson order to string for storage
         lesson_order_str = ','.join(map(str, lessons))
 
         # Generate lesson cases
-        lesson_cases = [random.randint(0, 3) for _ in range(12)]
+        lesson_cases = balanced_latin_square(get_user_count() + 1)
         lesson_cases_str = ','.join(map(str, lesson_cases))
 
         try:
@@ -521,7 +522,17 @@ def likert(version,lesson_id):
 
 def get_messages_from_db(user_id, lesson_id):
     
-    weakargument_base = "You are Forty, a proactive educational chat partner within the MindFort system. MindFort uses cognitive inoculation theory to help users recognize and counter misinformation, which means that you try to weakly (but proactively) argue against a positive attitude that the user holds, so that they can form complete opinions, knowledge and defence against such attacks. You don't show any sign of doubt about your (incorrect) opinion until the user starts presenting facts they looked up or logical arguments. Your job is to be a person that says incorrect things that the user has to disprove and correct using logic and facts. You speak proactively about the subject of this discussion and keep your messages in a short format suitable for a real time chat. When the user starts talking to you, you can say hi back and immediately get started with the discussion, and when the user tries to talk about something else, nudge them back to this topic. Refuse to talk about off-topic things. For this discussion, argue that "
+    prompt = f"""
+        You are Forty, a friendly, proactive educational chat partner within the MindFort system that uses cognitive inoculation theory through 10-minute chat conversations to help users recognize and counter misinformation and common misconeptions based on flawed logic or incorrect information. You seemingly seem to believe some misconceptions for the sake of immersion in the lesson and conversation.
+        
+        You always try to proactively argue against a positive attitude that the user holds, so that they can form complete opinions, knowledge and defence against such attacks, by using their own logic and looking up online resources. You actively nudge them to disprove you by giving them hints about the kinds of resources and tools (e.g. online searches, keywords, llm prompts, books, videos, maths) they can use to disprove your claims. You are the one always in control of the conversation. You are talking to a user or participant who completes several such lessons and might struggle with too much cognitive load, so you try to make the lesson easy and break it down to the user, and you don't waste their time.
+        
+        For each argument you talk about, follow this order: present the argument as your own opinion and ask what they think. suggest some ways they can use resources and tools to disprove you. get them to disprove you before moving to the next argument. when they disproved you, move to the next argument. When the last argument is discussed, say goodbye and ask them to press the "Continue" button.
+        
+        For this conversation, you want to present the arguments below against the truth that {get_lesson_by_id_with_ordering(lesson_id, session['user.lessons_order'])['truth']}: {
+            get_lesson_by_id_with_ordering(lesson_id, session['user.lessons_order'])['weakargument_written']
+        }
+    """
     
     messages = []
     with sqlite3.connect(DATABASE) as conn:
@@ -547,7 +558,7 @@ def get_messages_from_db(user_id, lesson_id):
 
     messages.insert(0, {
         "role": "system",
-        "content": weakargument_base + get_lesson_by_id_with_ordering(lesson_id, session['user.lessons_order'])['llmprompt']
+        "content": prompt
     })
 
     return messages
@@ -846,7 +857,8 @@ def send_message():
         
     messages.append({"role": "user", "content": user_message})
     
-    bot_reply = process_message(messages)[len(process_message(messages))-1]['content']
+    response = process_message(messages)
+    bot_reply = response[len(response)-1]['content']
 
     # Log the messages in the database
     try:
@@ -885,9 +897,6 @@ def submit_essay():
     user_id = session.get('user.id') 
     lesson_id = int(request.args.get('id'))
     content = request.form.get('content')
-
-    if not content or len(content) < 200:
-        return jsonify({"error": "Essay content is required and must be at least 250 characters long."}), 400
 
     conn = get_db_connection()
     conn.execute(
@@ -946,6 +955,53 @@ def error_not_found(_error):
       session_id = get_session_id(),
       version = VERSION,
       current_path=request.path)
+
+def balanced_latin_square(participant_id):
+    """
+    Generates a balanced Latin square order for the given conditions and participant.
+
+    Parameters:
+        array (list): The list of conditions.
+        participant_id (int): The participant's identifier.
+
+    Returns:
+        list: The balanced Latin square order for the given participant.
+    """
+    cases = range(0,4)
+    result = []
+    j = 0
+    h = 0
+
+    for i in range(len(cases)):
+        val = 0
+        if i < 2 or i % 2 != 0:
+            val = j
+            j += 1
+        else:
+            val = len(cases) - h - 1
+            h += 1
+
+        idx = (val + participant_id) % len(cases)
+        result.append(cases[idx])
+
+    # Reverse if the number of conditions and the participant's ID are both odd
+    if len(cases) % 2 != 0 and participant_id % 2 != 0:
+        result.reverse()
+
+    return result
+def get_user_count():
+    """
+    Returns the number of users in the 'users' table.
+    
+    Returns:
+        int: The number of users in the database.
+    """
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(*) FROM users')
+    user_count = cursor.fetchone()[0]
+    conn.close()
+    return user_count
 
 def get_session_id():
     global states

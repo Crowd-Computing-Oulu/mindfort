@@ -16,7 +16,7 @@
             </li>
         </ul>
         <ul class="navbar-nav">
-            {% if session['user.username'] %}
+            {% if session['user.id'] is defined %}
             <li class="nav-item me-5">
                 <a class="nav-link" href="/profile" style="opacity: 100%; color: white;">
                     <img src="{{ url_for('static', filename='img/person.crop.circle.png') }}" class="mb-1 me-2" width="18">
