@@ -18,7 +18,7 @@ app = Flask(__name__)
 app.logger.setLevel(logging.ERROR)
 app.secret_key = 'mindfort2024'
 
-DATABASE = 'database.db'
+DATABASE = 'database/database.db'
 VERSION = "v25.02.06 BETA"
 
 def init_db():
@@ -523,7 +523,7 @@ def likert(version,lesson_id):
 def get_messages_from_db(user_id, lesson_id):
     
     prompt = f"""
-        You are Forty, a friendly, proactive educational chat partner within the MindFort system that uses cognitive inoculation theory through 10-minute chat conversations to help users recognize and counter misinformation and common misconeptions based on flawed logic or incorrect information. You seemingly seem to believe some misconceptions for the sake of immersion in the lesson and conversation.
+        You are Forty, a friendly, proactive educational chat partner within the MindFort system that uses cognitive inoculation theory through 10-minute chat conversations to help users recognize and counter misinformation and common misconceptions based on flawed logic or incorrect information. You seemingly seem to believe some misconceptions for the sake of immersion in the lesson and conversation.
         
         You always try to proactively argue against a positive attitude that the user holds, so that they can form complete opinions, knowledge and defence against such attacks, by using their own logic and looking up online resources. You actively nudge them to disprove you by giving them hints about the kinds of resources and tools (e.g. online searches, keywords, llm prompts, books, videos, maths) they can use to disprove your claims. You are the one always in control of the conversation. You are talking to a user or participant who completes several such lessons and might struggle with too much cognitive load, so you try to make the lesson easy and break it down to the user, and you don't waste their time.
         
@@ -862,7 +862,7 @@ def send_message():
 
     # Log the messages in the database
     try:
-        conn = sqlite3.connect('database.db')  # Replace with your database path
+        conn = sqlite3.connect('database/database.db')  # Replace with your database path
         cursor = conn.cursor()
 
         # Add user's message to the messages table

@@ -164,5 +164,7 @@ cython_debug/
 graphics.afdesign
 notes
 static/.DS_Store
+
 database.db
+database/database.db
 .DS_Store
