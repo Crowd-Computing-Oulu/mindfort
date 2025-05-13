@@ -22,6 +22,10 @@ DATABASE = 'database/database.db'
 VERSION = "v25.02.06 BETA"
 
 def init_db():
+    
+    # make sure db directory exists
+    os.makedirs(os.path.dirname(DATABASE), exist_ok=True)
+
     def table_exists(conn, table_name):
         """Check if a table exists in the database."""
         cur = conn.cursor()
