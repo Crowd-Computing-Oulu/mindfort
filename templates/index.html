@@ -14,12 +14,31 @@
         {% if session['user.id'] is defined %}
             <!-- Signed-in User Content -->
             <div class="text-center mb-2 mt-5">
-               
-                
-                    <h2>Welcome, <b>{% if session['user.first_name'] == "" %}{{ session['user.username'].title() }} {% else %} {{ session['user.first_name'].title()}}{% endif %}</b>!</h2>
+                    <h2>Welcome, <b>{% if session['user.first_name'] == "" %}{{ session['user.username'].title() }} {% else %} {{ session['user.first_name'].title()}}{% endif %}</b>!</h2>     
+                    
+                    <p>Prolific ID: <code>
+                        {{session['user.username']}}
+                    </code></p>
 
-                
+                    <p>Thank you for participating in our experiment.<br>Please begin by opening the form below.<br>This form also includes the instructions for the entire task.</p>
+                    <a target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLScMurpVLpOKaNoMvvLwhoLZ7r63ennRQ8TbmUykmEi_zGtArA/viewform?usp=pp_url&entry.1231914852={{session['user.username']}}">
+
+                        
+                <button class="btn btn-lg btn-primary">
+                    Start Here
+                </button>
+            </a>
             </div>
+
+            
+
+            {% if session['user.username'] == "chiguest" %}
+            <div class="alert alert-success" role="alert">
+                <div class="text-center">
+                    <b>You are viewing MindFort via the CHI Guest account.</br> All lessons are unlocked for you, you can reset lessons, and there are lowered minimum times. </b>
+                </div>
+              </div>
+            {% endif %}
 
             <div class="text-center mb-4">
                 Level <b class="text-primary" style="font-size: 2rem;">{{session['user.level'] + 1}}</b>
@@ -36,14 +55,14 @@
                         </div>
                         <div >
                             <div class="p-2">
-                                {% if session['user.level'] > lesson_id %} 
+                                {% if session['user.level'] > lesson_id and session['user.username'] != "chiguest" %} 
                                 <a 
                                     class="btn btn-outline-success w-100 rounded-4 disabled" 
                                     >
                                     <img src="{{ url_for('static', filename='img/checkmark.circle.png') }}" class="mb-1  me-2" width="18">
                                     <b>{{ lesson_id + 1 }}</b> {{ lesson_data['title'] }}
                                 </a>
-                                {% elif session['user.level'] < lesson_id %} 
+                                {% elif session['user.level'] < lesson_id and session['user.username'] != "chiguest" %} 
                                 <a 
                                     class="btn btn-outline-danger w-100 rounded-4 disabled" >
                                     <img src="{{ url_for('static', filename='img/lock.png') }}" class="mb-1  me-2" width="18">
@@ -84,10 +103,11 @@
                     </p>
 
                     <p>
-                        This experiment was conducted to explore how individuals resist negative persuasion and reinforce their existing beliefs. Please be aware that in step four of each lesson, you were deliberately presented with incorrect and misleading information as part of the study's design. The purpose of this exercise was to simulate real-world scenarios where misinformation might be encountered and to observe how individuals defend against such persuasion. We assure you that the information provided in this step was not intended to change or undermine your original beliefs, which remain completely valid and supported.
+                        Completion code: <code>TYVM2025</code>
                     </p>
+
                     <p>
-                        We appreciate your participation and remind you of the importance of critically evaluating all information you encounter, whether that be online or out in the real world.
+                        Please return to the Google Form and continue to Section 3: Post-Experiment Questionnaire.
                     </p>
                 </div>
             </div>
@@ -99,36 +119,34 @@
         {% else %}
             <!-- Non-Signed-in User Content -->
 <!-- Non-Signed-in User Content -->
-<div class="text-left">
-    <h1 class="m-5">Welcome to MindFort!</h1>
-    <div class="row">
-        <div class="col-md-8"> 
-            <p class="lead m-4">
-                MindFort is designed to help you recognize and counter misinformation across a wide range of topics. 
-                Strengthen your critical thinking, and expand your knowledge through engaging lessons and discussions.
-            </p>
-        <ol class="me-5">
-            <li><b>Debate Forty:</b> Engage in a guided discussion where Forty presents an flawed opinion on a topic.</li>
-            <li><b>Challenge and Learn:</b> With each discussion, you’ll sharpen your ability to spot flawed logic and misinformation.</li>
-            <li><b>Various Subjects:</b> Explore topics like dental health, mental wellness, cybersecurity, and more.</li>
-        </ol>
-        </div>
-        <div class="col-md-4"> 
-            <img src="{{ url_for('static', filename='img/forty.png') }}" height="256px">
-            <br>
-            <a href="/signup" class="btn btn-primary btn-lg m-5">Get Started</a>
-        </div>
 
-    </div>
-  
-
-    
-
-    
- 
-   
     <!-- Topics Grid -->
 <div class="container mt-1">
+    <h1 class="mb-4 text-center">Welcome to MindFort!</h1>
+
+<div class="row align-items-center">
+    <div class="col-12 col-md-8 mb-4">
+        <p class="lead">
+            MindFort is designed to help you recognize and counter misinformation across a wide range of topics.
+            Strengthen your critical thinking, and expand your knowledge through engaging lessons and discussions.
+        </p>
+        <ol class="ps-3">
+            <li><b>Debate Forty:</b> Engage in a guided discussion where Forty presents a flawed opinion on a topic.</li>
+            <li><b>Challenge and Learn:</b> Sharpen your ability to spot flawed logic and misinformation with each debate.</li>
+            <li><b>Various Subjects:</b> Explore topics like dental health, mental wellness, cybersecurity, and more.</li>
+        </ol>
+    </div>
+
+    <div class="col-12 col-md-4 text-center mb-4">
+        <img src="{{ url_for('static', filename='img/forty.png') }}" class="img-fluid mb-3" style="max-height: 200px;" alt="Forty">
+        <br>
+        <a href="/signup" class="btn btn-primary btn-lg">Get Started</a> <br>
+        <a class="btn btn-secondary mt-3 mb-3" href="/chiguestsignin">
+            CHI 2025 Guest Signin →
+        </a>
+    </div>
+</div>
+
     <div class="row text-center">
         
         <!-- Medicine Topic -->
