@@ -22,7 +22,7 @@
                 <p class="mb-5">
                     {{ lesson.desc }}
                     {% if session['user.lesson_cases'][lesson.id] == '0' %}
-                    In this lesson, you will not have to argue. 
+                    In this lesson, you will not have to argue.
                     {% endif %}
                     {% if session['user.lesson_cases'][lesson.id] == '1' %}
                     In this lesson, you will be shown an argument essay.
@@ -53,11 +53,9 @@
                     What do you think about the following statement?
                 </p>
                 <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
-                    <span
-                        style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
+                    <span style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
                     <span class="m-5">{{ lesson.truth }}</span>
-                    <span
-                        style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
+                    <span style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
                 </p>
                 <div class="mt-5">
                     <style>
@@ -67,6 +65,7 @@
                             margin-top: 20px;
                             margin-left: 5px;
                         }
+
                         .scale-markers {
                             position: absolute;
                             width: 100%;
@@ -74,6 +73,7 @@
                             left: 0;
                             height: 20px;
                         }
+
                         .scale-markers::before {
                             content: '';
                             position: absolute;
@@ -83,6 +83,7 @@
                             top: 50%;
                             z-index: 1;
                         }
+
                         .scale-marker {
                             position: absolute;
                             top: 0;
@@ -90,10 +91,12 @@
                             background-color: rgb(0, 0, 0);
                             z-index: 2;
                         }
+
                         .marker-label {
                             font-size: 0.75rem;
                             text-align: center;
                         }
+
                         /* Define different heights for the markers */
                         .scale-marker:nth-child(1),
                         .scale-marker:nth-child(4),
@@ -101,15 +104,19 @@
                         .scale-marker:nth-child(10),
                         .scale-marker:nth-child(13),
                         .scale-marker:nth-child(16) {
-                            height: 40px; /* Longer markers */
+                            height: 40px;
+                            /* Longer markers */
                             width: 3px;
                         }
+
                         .scale-marker:not(:nth-child(1)):not(:nth-child(4)):not(:nth-child(7)):not(:nth-child(10)):not(:nth-child(13)):not(:nth-child(16)) {
-                            height: 20px; /* Regular markers */
+                            height: 20px;
+                            /* Regular markers */
                         }
                     </style>
-                    <input type="range" style="border: none; box-shadow: none; margin-left: 20px; width: 94%; margin-bottom: -15px;" class="form-range" id="belief-scale"
-                           name="likert_scale" min="1" max="15" step="1" required>
+                    <input type="range"
+                        style="border: none; box-shadow: none; margin-left: 20px; width: 94%; margin-bottom: -15px;"
+                        class="form-range" id="belief-scale" name="likert_scale" min="1" max="15" step="1" required>
                     <div class="scale-container">
                         <div class="scale-markers">
                             <!-- Create one scale marker for each position from 0 to 14 to show snap points -->
@@ -146,102 +153,105 @@
             {% endif %}
             {% if lesson_state == 1 %}
             {% if session['user.lesson_cases'][lesson.id] == '0' %}
-                <div class="text-center">
-                    Please continue to the next stage.
-                    <form action="/finish_stage" method="POST">
-                        <input type="hidden" name="id" value="{{lesson.id}}">
-                        <button type="submit" class="btn btn-primary mt-5">Continue</button>
-                    </form>
-                </div>
+            <div class="text-center">
+                Please continue to the next stage.
+                <form action="/finish_stage" method="POST">
+                    <input type="hidden" name="id" value="{{lesson.id}}">
+                    <button type="submit" class="btn btn-primary mt-5">Continue</button>
+                </form>
+            </div>
             {% endif %}
             {% if session['user.lesson_cases'][lesson.id] == '1' %}
-                <p>
-                    Please read the following essay carefully and answer the questions below.
-                </p>
+            <p>
+                Please read the following essay carefully and answer the questions below.
+            </p>
 
-                <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
-                    <span
-                        style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
-                    <span class="m-5">{{ lesson.refutation_essay | safe }}</span>
-                    <span
-                        style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
-                </p>
+            <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
+                <span style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
+                <span class="m-5">{{ lesson.refutation_essay | safe }}</span>
+                <span style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
+            </p>
 
-                <div class="text-center">
-                    <form action="/finish_stage" method="POST">
-                        <input type="hidden" name="id" value="{{lesson.id}}">
-                        <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2" disabled>Continue (3:00)</button>
-                        <p class="small">Please read the text carefully for at least 3 minutes before continuing. The timer resets if you leave or reload this page.</p>
-                    </form>
-                </div>
-                
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        var button = document.getElementById('continueButton');
-                        var countdownTime = 3 * 60; // 5 minutes in seconds
-                
-                        // Disable the button initially
-                        button.disabled = true;
-                
-                        var timer = setInterval(function () {
-                            if (countdownTime <= 0) {
-                                clearInterval(timer);
-                                button.disabled = false;
-                                button.textContent = 'Continue';
-                            } else {
-                                countdownTime--;
-                                // Format the remaining time
-                                var minutes = Math.floor(countdownTime / 60);
-                                var seconds = countdownTime % 60;
-                                button.textContent = 'Continue (' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds + ')';
-                            }
-                        }, 1000); // Timer intervals every second
-                    });
-                </script>
+            <div class="text-center">
+                <form action="/finish_stage" method="POST">
+                    <input type="hidden" name="id" value="{{lesson.id}}">
+                    <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2"
+                        disabled>Continue (3:00)</button>
+                    <p class="small">Please read the text carefully for at least 3 minutes before continuing. The timer
+                        resets if you leave or reload this page.</p>
+                </form>
+            </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    var button = document.getElementById('continueButton');
+                    var countdownTime = 3 * 60; // 5 minutes in seconds
+
+                    // Disable the button initially
+                    button.disabled = true;
+
+                    var timer = setInterval(function () {
+                        if (countdownTime <= 0) {
+                            clearInterval(timer);
+                            button.disabled = false;
+                            button.textContent = 'Continue';
+                        } else {
+                            countdownTime--;
+                            // Format the remaining time
+                            var minutes = Math.floor(countdownTime / 60);
+                            var seconds = countdownTime % 60;
+                            button.textContent = 'Continue (' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds + ')';
+                        }
+                    }, 1000); // Timer intervals every second
+                });
+            </script>
             {% endif %}
             {% if session['user.lesson_cases'][lesson.id] == '2' %}
             <div class="text-center">
                 <form id="argEssayForm" action="/submit_essay?id={{ lesson.id }}" method="POST">
                     <div class="mb-3">
 
-                        <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
-                            <span
-                                style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
+                        <p class="bg-light p-3 rounded-3 position-relative"
+                            style="font-style: italic; font-size: 1.1em;">
+                            <span style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
                             <span class="m-5">{{ lesson.weakargument_written | safe }}</span>
-                            <span
-                                style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
+                            <span style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
                         </p>
 
                         <label for="exampleFormControlTextarea1" class="form-label">
-                            Use any resource available to you and your own reasoning to argue each of the statements above, with one paragraph each.
+                            Use any resource available to you and your own reasoning to argue each of the statements
+                            above, with one paragraph each.
                         </label>
-                        <textarea id="essaycontent" placeholder="Type your argument here..." class="form-control" required name="content" rows="10" oninput="updateCharacterCount()"></textarea>
+                        <textarea id="essaycontent" placeholder="Type your argument here..." class="form-control"
+                            required name="content" rows="10" oninput="updateCharacterCount()"></textarea>
                         <div id="charCount" class="mt-2">0/400 characters</div>
-                        
+
                         <!-- TODO: add this back -->
                         <!-- <label for="exampleFormControlTextarea1" class="form-label mt-4">
                           Please briefly tell what resource(s) you used and how.
                         </label>
                         <textarea id="essaycontent" placeholder="Type your answer here..." class="form-control" required name="resources" rows="2" oninput="updateCharacterCount()"></textarea> -->
 
-                        
+
                     </div>
                     <div class="text-center">
                         <form action="/finish_stage" method="POST">
                             <input type="hidden" name="id" value="{{lesson.id}}">
-                            <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2" disabled>Continue (5:00)</button>
+                            <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2"
+                                disabled>Continue (5:00)</button>
                         </form>
-                        <p class="small mt-3 ms-3 me-3">Please work on this task for at least 5 minutes before continuing. The timer resets if you leave or reload this page.</p>
+                        <p class="small mt-3 ms-3 me-3">Please work on this task for at least 5 minutes before
+                            continuing. The timer resets if you leave or reload this page.</p>
                     </div>
-                    
+
                     <script>
                         document.addEventListener('DOMContentLoaded', function () {
                             var button = document.getElementById('continueButton');
                             var countdownTime = 5 * 60; // 5 minutes in seconds
-                    
+
                             // Disable the button initially
                             button.disabled = true;
-                    
+
                             var timer = setInterval(function () {
                                 if (countdownTime <= 0) {
                                     clearInterval(timer);
@@ -259,16 +269,16 @@
                     </script>
                 </form>
             </div>
-            
+
             <script>
                 function updateCharacterCount() {
                     const textarea = document.getElementById('essaycontent');
                     const charCount = document.getElementById('charCount');
                     const submitBtn = document.getElementById('submitBtn');
-                    
+
                     const currentLength = textarea.value.length;
                     charCount.textContent = `${currentLength}/400 characters`;
-            
+
                     if (currentLength >= 400) {
                         submitBtn.disabled = false;
                     } else {
@@ -276,7 +286,7 @@
                     }
                 }
             </script>
-         
+
             {% endif %}
             {% if session['user.lesson_cases'][lesson.id] == '3' %}
             <div>
@@ -366,18 +376,22 @@
                     <div>
                         <form action="/finish_conv?id={{ lesson.id }}" method="GET">
                             <input type="hidden" name="id" value="{{lesson.id}}">
-                            <button id="finishConvButton" disabled class="btn btn-outline-success btn-sm m-2"disabled><nobr>Continue (10:00)</nobr></button>
+                            <button id="finishConvButton" disabled class="btn btn-outline-success btn-sm m-2" disabled>
+                                <nobr>Continue (10:00)</nobr>
+                            </button>
                         </form>
                     </div>
-                    <p class="small mt-3 ms-3 me-3">Please converse with Forty for at least ten minutes before continuing, but no more than five minutes for each argument he presents. The timer resets if you leave or reload this page.</p>
+                    <p class="small mt-3 ms-3 me-3">Please converse with Forty for at least ten minutes before
+                        continuing, but no more than five minutes for each argument he presents. The timer resets if you
+                        leave or reload this page.</p>
                     <script>
                         document.addEventListener('DOMContentLoaded', function () {
                             var button = document.getElementById('finishConvButton');
                             var countdownTime = 10 * 60; // 5 minutes in seconds
-                    
+
                             // Disable the button initially
                             button.disabled = true;
-                    
+
                             var timer = setInterval(function () {
                                 if (countdownTime <= 0) {
                                     clearInterval(timer);
@@ -425,11 +439,9 @@
                 What do you think about the following statement?
             </p>
             <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
-                <span
-                    style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
+                <span style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
                 <span class="m-5">{{ lesson.truth }}</span>
-                <span
-                    style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
+                <span style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
             </p>
             <div class="mt-5">
                 <style>
@@ -439,6 +451,7 @@
                         margin-top: 20px;
                         margin-left: 5px;
                     }
+
                     .scale-markers {
                         position: absolute;
                         width: 100%;
@@ -446,6 +459,7 @@
                         left: 0;
                         height: 20px;
                     }
+
                     .scale-markers::before {
                         content: '';
                         position: absolute;
@@ -455,6 +469,7 @@
                         top: 50%;
                         z-index: 1;
                     }
+
                     .scale-marker {
                         position: absolute;
                         top: 0;
@@ -462,10 +477,12 @@
                         background-color: rgb(0, 0, 0);
                         z-index: 2;
                     }
+
                     .marker-label {
                         font-size: 0.75rem;
                         text-align: center;
                     }
+
                     /* Define different heights for the markers */
                     .scale-marker:nth-child(1),
                     .scale-marker:nth-child(4),
@@ -473,15 +490,19 @@
                     .scale-marker:nth-child(10),
                     .scale-marker:nth-child(13),
                     .scale-marker:nth-child(16) {
-                        height: 40px; /* Longer markers */
+                        height: 40px;
+                        /* Longer markers */
                         width: 3px;
                     }
+
                     .scale-marker:not(:nth-child(1)):not(:nth-child(4)):not(:nth-child(7)):not(:nth-child(10)):not(:nth-child(13)):not(:nth-child(16)) {
-                        height: 20px; /* Regular markers */
+                        height: 20px;
+                        /* Regular markers */
                     }
                 </style>
-                <input type="range" style="border: none; box-shadow: none; margin-left: 20px; width: 94%; margin-bottom: -15px;" class="form-range" id="belief-scale"
-                       name="likert_scale" min="1" max="15" step="1" required>
+                <input type="range"
+                    style="border: none; box-shadow: none; margin-left: 20px; width: 94%; margin-bottom: -15px;"
+                    class="form-range" id="belief-scale" name="likert_scale" min="1" max="15" step="1" required>
                 <div class="scale-container">
                     <div class="scale-markers">
                         <!-- Create one scale marker for each position from 0 to 14 to show snap points -->
@@ -523,30 +544,30 @@
         </p>
 
         <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
-            <span
-                style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
+            <span style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
             <span class="m-5">{{ lesson.strongargument_written | safe }}</span>
-            <span
-                style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
+            <span style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
         </p>
 
         <div class="text-center">
             <div class="text-center">
                 <form action="/finish_stage" method="POST">
                     <input type="hidden" name="id" value="{{lesson.id}}">
-                    <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2" disabled>Continue (3:00)</button>
-                    <p class="small">Please read the text carefully for at least 3 minutes before continuing. The timer resets if you leave or reload this page.</p>
+                    <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2"
+                        disabled>Continue (3:00)</button>
+                    <p class="small">Please read the text carefully for at least 3 minutes before continuing. The timer
+                        resets if you leave or reload this page.</p>
                 </form>
             </div>
-            
+
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
                     var button = document.getElementById('continueButton');
                     var countdownTime = 3 * 60; // 5 minutes in seconds
-            
+
                     // Disable the button initially
                     button.disabled = true;
-            
+
                     var timer = setInterval(function () {
                         if (countdownTime <= 0) {
                             clearInterval(timer);
@@ -571,11 +592,9 @@
                 What do you think about the following statement?
             </p>
             <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
-                <span
-                    style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
+                <span style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
                 <span class="m-5">{{ lesson.truth }}</span>
-                <span
-                    style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
+                <span style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
             </p>
             <div class="mt-5">
                 <style>
@@ -585,6 +604,7 @@
                         margin-top: 20px;
                         margin-left: 5px;
                     }
+
                     .scale-markers {
                         position: absolute;
                         width: 100%;
@@ -592,6 +612,7 @@
                         left: 0;
                         height: 20px;
                     }
+
                     .scale-markers::before {
                         content: '';
                         position: absolute;
@@ -601,6 +622,7 @@
                         top: 50%;
                         z-index: 1;
                     }
+
                     .scale-marker {
                         position: absolute;
                         top: 0;
@@ -608,10 +630,12 @@
                         background-color: rgb(0, 0, 0);
                         z-index: 2;
                     }
+
                     .marker-label {
                         font-size: 0.75rem;
                         text-align: center;
                     }
+
                     /* Define different heights for the markers */
                     .scale-marker:nth-child(1),
                     .scale-marker:nth-child(4),
@@ -619,15 +643,19 @@
                     .scale-marker:nth-child(10),
                     .scale-marker:nth-child(13),
                     .scale-marker:nth-child(16) {
-                        height: 40px; /* Longer markers */
+                        height: 40px;
+                        /* Longer markers */
                         width: 3px;
                     }
+
                     .scale-marker:not(:nth-child(1)):not(:nth-child(4)):not(:nth-child(7)):not(:nth-child(10)):not(:nth-child(13)):not(:nth-child(16)) {
-                        height: 20px; /* Regular markers */
+                        height: 20px;
+                        /* Regular markers */
                     }
                 </style>
-                <input type="range" style="border: none; box-shadow: none; margin-left: 20px; width: 94%; margin-bottom: -15px;" class="form-range" id="belief-scale"
-                       name="likert_scale" min="1" max="15" step="1" required>
+                <input type="range"
+                    style="border: none; box-shadow: none; margin-left: 20px; width: 94%; margin-bottom: -15px;"
+                    class="form-range" id="belief-scale" name="likert_scale" min="1" max="15" step="1" required>
                 <div class="scale-container">
                     <div class="scale-markers">
                         <!-- Create one scale marker for each position from 0 to 14 to show snap points -->
@@ -657,8 +685,15 @@
                     <span class="marker-label">Definitely <br>TRUE</span>
                 </div>
             </div>
+            <div class="alert alert-primary mt-5 mb-3" role="alert">
+               <b>Important!
+                    </b> Before completing this lesson, remember to fill the <a href="https://docs.google.com/forms/d/e/1FAIpQLSf19sqPU43em5bPRjqboFxMCk-_XA0ZfPqZ7a5Dx6MNZRpjTw/viewform?usp=preview"
+                        target="_blank"> IMI Questionnaire</a>.
+                
+            </div>
+
             <div class="text-center">
-                <button type="submit" class="btn btn-primary mt-5">Submit</button>
+                <button type="submit" class="btn btn-primary mt-5">Complete lesson</button>
             </div>
         </form>
         {% endif %}
