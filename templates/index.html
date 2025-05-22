@@ -4,9 +4,9 @@
 {% include 'includes/head.html' %}
 <script>
     // Helper functions to get and set cookies
-    function setCookie(name, value, days) {
+    function setCookie(name, value, minutes) {
         const d = new Date();
-        d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+        d.setTime(d.getTime() + (minutes * 60 * 1000));
         document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`;
     }
 
@@ -57,7 +57,7 @@
             if (firstLessonButton) {
                 firstLessonButton.classList.remove('disabled');
                 firstLessonButton.setAttribute('aria-disabled', 'false');
-                setCookie('started', 'true', 7);
+                setCookie('started', 'true', 60);
             }
         });
     });
@@ -163,11 +163,11 @@
         <div class="card m-5">
             <div class="card-body">
                 <h1>
-                    Congratulations! 🥳 You completed all the lessons.
+                    Congratulations! 🥳 
                 </h1>
 
                 <p>
-                    Completion code: <code>TYVM2025</code>
+                    You completed all the lessons. Completion code: <code>TYVM2025</code>
                 </p>
 
                 <p>
@@ -178,7 +178,7 @@
         {% endif %}
 
         <div class="m-5 text-center">
-            <img src="{{ url_for('static', filename='img/forty.png') }}" height="256px">
+            <img src="{{ url_for('static', filename='img/forty.png') }}" height="128px">
         </div>
         {% else %}
         <!-- Non-Signed-in User Content -->
