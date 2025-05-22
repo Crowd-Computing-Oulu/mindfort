@@ -19,7 +19,7 @@ app.logger.setLevel(logging.ERROR)
 app.secret_key = 'mindfort2024'
 
 DATABASE = 'database/database.db'
-VERSION = "v25.02.06 BETA"
+VERSION = "v25.05.22"
 
 def init_db():
     
