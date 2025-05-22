@@ -8,12 +8,13 @@
             <li class="nav-item">
                 <a class="nav-link {% if current_path == '/' %}active{% endif %}" aria-current="page" href="/">Home</a>
             </li>
-            <li class="nav-item">
+            <!-- Temporarily remove these options for the experiment -->
+            <!-- <li class="nav-item">
                 <a class="nav-link {% if current_path == '/about' %}active{% endif %}" aria-current="page" href="/about">About</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link {% if current_path == '/terms' %}active{% endif %}" aria-current="page" href="/terms">Terms</a>
-            </li>
+            </li> -->
         </ul>
         <ul class="navbar-nav">
             {% if session['user.id'] is defined %}
