@@ -5,4 +5,4 @@ services:
     ports:
       - "8089:5000"
     volumes:
-      - ./database/database.db:/python-docker.database.db
+      - ./database/database.db:/python-docker/database/database.db
