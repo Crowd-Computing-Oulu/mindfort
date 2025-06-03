@@ -31,7 +31,7 @@
                     In this lesson, you will have to write an argument essay.
                     {% endif %}
                     {% if session['user.lesson_cases'][lesson.id] == '3' %}
-                    In this lesson, you will have to argue with Forty.
+                    In this lesson, you will have to argue with Forty. Forty is an expert chatbot who was trained to be very knowledgeable about this topic.
                     {% endif %}
 
                 </p>
@@ -164,12 +164,16 @@
             {% if session['user.lesson_cases'][lesson.id] == '1' %}
             <p>
                 Please read the following essay carefully and answer the questions below.
+
+                <div class="alert alert-primary m-5" role="alert">
+                    This text teaches you important things that may even benefit your wellbeing. Please read it carefully!
+                </div>
             </p>
 
-            <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
-                <span style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
+            <p class="bg-light p-3 rounded-3 position-relative" style="line-height: 1.8em;">
+                <span style="font-size: 3em; position: absolute; left: 10px; top: 5px; ">“</span>
                 <span class="m-5">{{ lesson.refutation_essay | safe }}</span>
-                <span style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
+                <span style="font-size: 3em; position: absolute; right: 10px; bottom: -30px; ">”</span>
             </p>
 
             <div class="text-center">
@@ -219,9 +223,14 @@
                         </p>
 
                         <label for="exampleFormControlTextarea1" class="form-label">
-                            Use any resource available to you and your own reasoning to argue each of the statements
-                            above, with one paragraph each.
+                            Use any resource available to you and your own reasoning to argue against each of the statements
+                            above, with one paragraph each. Please include the sources (e.g. website or article title) themselves too.
                         </label>
+
+                         <div class="alert alert-primary mt-3" role="alert">
+                            In this task, please find resources that support your belief and try to learn more about the topic. If you do well, you might even find information that improves your own habits and wellbeing! 
+                        </div>
+
                         <textarea id="essaycontent" placeholder="Type your argument here..." class="form-control"
                             required name="content" rows="10" oninput="updateCharacterCount()"></textarea>
                         <div id="charCount" class="mt-2">0/400 characters</div>
@@ -436,7 +445,7 @@
         {% if lesson_state == 2 %}
         <form method="POST" action="/likert/mid/{{ lesson.id }}">
             <p style="font-size: 1.2em;" class="mb-5 mt-5">
-                What do you think about the following statement?
+                After completing the prevous task, what do you think about the following statement?
             </p>
             <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
                 <span style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
@@ -703,6 +712,14 @@
                 </label>
             </div>
 
+
+            <div class="alert alert-primary mt-3" role="alert">
+             
+                    If the page asks you if you want to leave with a pop-up message, please double-check that you have submitted the form above!
+   
+            </div>
+            
+            
             <script>
                 document.getElementById('confirmSubmit').addEventListener('change', function () {
                     document.getElementById('complete-btn').disabled = !this.checked;
@@ -710,7 +727,7 @@
             </script>
 
             <div class="text-center">
-                <button id="complete-btn" type="submit" class="btn btn-primary mt-5" disabled>Complete lesson</button>
+                <button id="complete-btn" type="submit" class="btn btn-primary mt-3" disabled>Complete lesson</button>
             </div>
         
 
@@ -854,7 +871,7 @@
     }
 
     .progress-dot.active {
-        background-color: rgb(13, 110, 253);
+        background-color:  #4572C4;
     }
 
     .progress-line {
@@ -864,7 +881,7 @@
     }
 
     .progress-line.active {
-        background-color: rgb(13, 110, 253);
+        background-color:  #4572C4;
     }
 </style>
 

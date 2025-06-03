@@ -1,3 +1,44 @@
+:root {
+  /* Base primary color */
+  --bs-primary: #4572C4;
+
+  /* RGB version for components that use rgba() (e.g., shadows, borders) */
+  --bs-primary-rgb: 69, 114, 196;
+
+  /* Override blue utility if used anywhere */
+  --bs-blue: #4572C4;
+
+  /* Link color override */
+  --bs-link-color: #4572C4;
+
+  /* Progress bar */
+  --bs-progress-bar-bg: #4572C4;
+}
+
+
+/* Ensure buttons use your primary color */
+.btn-primary {
+  background-color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+}
+
+.btn-primary:hover {
+  background-color: #3b64b1 !important;
+  border-color: #3b64b1 !important;
+}
+
+/* Navbar if using bg-primary */
+.navbar.bg-primary,
+.navbar.navbar-dark.bg-primary {
+  background-color: var(--bs-primary) !important;
+}
+
+/* Progress bar */
+.progress-bar {
+  background-color: #4572C4 !important;
+}
+
+
 body {
   background-color: #fafdff; /* Light grey background */
   font-family: "Capriola", sans-serif;
