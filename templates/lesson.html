@@ -702,19 +702,20 @@
             </div> -->
 
             <h4 class="mt-5"> Please fill out the form below.</h4>
-            <iframe id="google-form" class="mt-2 mb-3" src="https://docs.google.com/forms/d/e/1FAIpQLSf19sqPU43em5bPRjqboFxMCk-_XA0ZfPqZ7a5Dx6MNZRpjTw/viewform?usp=pp_url&entry.1231914852={{ session['user.email'] }}&entry.24407953={{ lesson.id }}&embedded=true" width="640" height="640" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+            <iframe id="google-form" class="mt-2 mb-3" src="https://docs.google.com/forms/d/e/1FAIpQLSf19sqPU43em5bPRjqboFxMCk-_XA0ZfPqZ7a5Dx6MNZRpjTw/viewform?usp=pp_url&entry.1231914852={{ session['user.email'] }}&entry.24407953={{ lesson.id }}&embedded=true" width="640" height="1200" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
 
-            <div class="form-check mt-4 text-center">
-    
-                <label class="form-check-label" for="confirmSubmit">
-                    <input class="form-check-input" type="checkbox" value="" id="confirmSubmit">
-                    I have submitted the form.
-                </label>
+           
+
+
+            <div class="alert alert-danger mt-3" role="alert">
+                    Please make sure that you completed the form above and see the <span style="font-style: italic;">"OK! You can now complete this lesson."</span> message. If you do not see that completion message, you did not complete the form and you must not leave this lesson yet.
             </div>
 
-
-            <div class="alert alert-primary mt-3" role="alert">
-                    If the page asks you if you want to leave with a pop-up message, please double-check that you have submitted the form above!
+             <div class="form-check mt-4 text-center">
+                <label class="form-check-label" for="confirmSubmit">
+                    <input class="form-check-input" type="checkbox" value="" id="confirmSubmit">
+                    I have completed and submitted the form above. 
+                </label>
             </div>
             
             
