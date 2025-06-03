@@ -110,6 +110,24 @@
             Level <b class="text-primary" style="font-size: 2rem;">{{session['user.level'] + 1}}</b>
         </div>
 
+        {% if session['user.level'] == 4 %}
+        <div class="card m-5">
+            <div class="card-body">
+                <h1>
+                    Congratulations! 🥳 
+                </h1>
+
+                <p>
+                    You completed all the lessons. Please enter this code in the Google Form: <code>TYVM2025</code>
+                </p>
+
+                <p>
+                    Please return to the Google Form and continue to Section 3: Post-Experiment Questionnaire.
+                </p>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="topics">
             <div class="card p-3 rounded-5">
 
@@ -122,7 +140,7 @@
                         <div>
                             <div class="p-2">
                                 {% if session['user.level'] > lesson_id and session['user.username'] != "chiguest" %}
-                                <a href="{{ url_for('lesson', id=loop.index - 1) }}"
+                                <a 
                                     class="btn btn-outline-success w-100 rounded-4 lessonbutton disabled ">
                                     <img src="{{ url_for('static', filename='img/checkmark.circle.png') }}"
                                         class="mb-1  me-2" width="18">
@@ -159,23 +177,7 @@
             </div>
         </div>
 
-        {% if session['user.level'] == 4 %}
-        <div class="card m-5">
-            <div class="card-body">
-                <h1>
-                    Congratulations! 🥳 
-                </h1>
 
-                <p>
-                    You completed all the lessons. Please enter this code in the Google Form: <code>TYVM2025</code>
-                </p>
-
-                <p>
-                    Please return to the Google Form and continue to Section 3: Post-Experiment Questionnaire.
-                </p>
-            </div>
-        </div>
-        {% endif %}
 
         <div class="m-5 text-center">
             <img src="{{ url_for('static', filename='img/forty.png') }}" height="128px">
