@@ -188,16 +188,25 @@ def index():
     
 @app.route('/admin')
 def admin():
-    if session.get('user.email'):
-        if session.get('user.email') in ['daniel.szabo@oulu.fi']:
-            return render_template('admin.html', 
-                users = get_users_from_db(),
-                session_id = get_session_id(),
-                version = VERSION,
-                current_path=request.path)
-    
-    return redirect(url_for('index'))
-        
+    from flask import request, Response
+
+    USERNAME = 'admin'
+    PASSWORD = 'secret'  # !!! Replace with your secure password  !!!
+
+    auth = request.authorization
+    if not auth or not (auth.username == USERNAME and auth.password == PASSWORD):
+        return Response(
+            'Authentication required.', 401,
+            {'WWW-Authenticate': 'Basic realm="Login Required"'}
+        )
+
+    return render_template(
+        'admin.html',
+        users=get_users_from_db(),
+        session_id=get_session_id(),
+        version=VERSION,
+        current_path=request.path
+    )
 
 @app.route('/prolific_login', methods=['GET'])
 def prolific_login():

@@ -428,6 +428,13 @@
                                     button.innerHTML = '<nobr>Continue (' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds + ')</nobr>';
                                 }
                             }
+                            
+                            function clearTimer() {
+                                localStorage.removeItem('finishConvEndTime');
+                            }
+
+                            // Clear timer on button click
+                            button.addEventListener('click', clearTimer);
 
                             updateTimer(); // Call once immediately
                             var timer = setInterval(updateTimer, 1000);
