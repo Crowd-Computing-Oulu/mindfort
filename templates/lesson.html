@@ -219,7 +219,7 @@
             </script>
             {% endif %}
             {% if session['user.lesson_cases'][lesson.id] == '2' %}
-            <div class="text-center">
+            <div>
                 <form id="argEssayForm" action="/submit_essay?id={{ lesson.id }}" method="POST">
                     <div class="mb-3">
 
@@ -231,17 +231,11 @@
                         </p>
 
                         <label for="exampleFormControlTextarea1" class="form-label">
-                            Use any resource (internet search, online libraries) available to you and your own reasoning
-                            to argue <strong>against</strong> each of the
-                            statements above, with one paragraph each. Please include the sources (e.g. website or
-                            article title)
-                            themselves too. Avoid using AI for this task.
+                            
                         </label>
 
                         <div class="alert alert-primary mt-3" role="alert">
-                            In this task, please find resources that support your belief and try to learn more about the
-                            topic. If you do well, you might even find information that improves your own habits and
-                            wellbeing!
+                            <strong class="me-3">Task</strong>In this task, you see four common misconceptions above about the current topic. Please find and use resources that support your own belief and disprove those four arguments. If you do well, you might even find information that improves your own habits and wellbeing! Please use online resources, search, scientific articles etc. but avoid using AI. Please also include the sources for your own counterarguments if possible.
                         </div>
 
                         <textarea id="essaycontent"
