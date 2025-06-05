@@ -58,6 +58,11 @@
                     <span class="m-5">{{ lesson.truth }}</span>
                     <span style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
                 </p>
+
+                <div class="alert alert-primary mt-3" role="alert">
+                    <strong class="me-3">Task</strong> 
+                    Please select on this scale what you think about the statement above. Pay attention to the directions on the scale: left means you disagree, right means you agree.
+                </div>
                 <div class="mt-5">
                     <style>
                         .scale-container {
@@ -139,6 +144,8 @@
                             <div class="scale-marker" style="left: 100%;"></div>
                         </div>
                     </div>
+
+                    
                     <div class="d-flex justify-content-between mt-5" style="margin-left: 35px; margin-right: 35px;">
                         <span class="marker-label">Definitely<br> FALSE</span>
                         <span class="marker-label">Probably<br> FALSE</span>
@@ -155,7 +162,7 @@
             {% if lesson_state == 1 %}
             {% if session['user.lesson_cases'][lesson.id] == '0' %}
             <div class="text-center">
-                Please continue to the next stage.
+                In this lesson, the second step is skipped. Please continue to the next stage.
                 <form action="/finish_stage" method="POST">
                     <input type="hidden" name="id" value="{{lesson.id}}">
                     <button type="submit" class="btn btn-primary mt-5">Continue</button>
@@ -163,14 +170,14 @@
             </div>
             {% endif %}
             {% if session['user.lesson_cases'][lesson.id] == '1' %}
-            <p>
-                Please read the following essay carefully and answer the questions below.
+           
+
+                
 
             <div class="alert alert-primary m-5" role="alert">
-                This text teaches you important things that may even benefit your wellbeing. Please read it carefully!
+               <strong class="me-3">Task</strong> Please read the below text carefully. Pay attention as you may be asked questions about it later.
             </div>
-            </p>
-
+           
             <p class="bg-light p-3 rounded-3 position-relative" style="line-height: 1.8em;">
                 <span style="font-size: 3em; position: absolute; left: 10px; top: 5px; ">“</span>
                 <span class="m-5">{{ lesson.refutation_essay | safe }}</span>
@@ -224,8 +231,10 @@
                         </p>
 
                         <label for="exampleFormControlTextarea1" class="form-label">
-                            Use any resource (internet search, online libraries) available to you and your own reasoning to argue <strong>against</strong> each of the
-                            statements above, with one paragraph each. Please include the sources (e.g. website or article title)
+                            Use any resource (internet search, online libraries) available to you and your own reasoning
+                            to argue <strong>against</strong> each of the
+                            statements above, with one paragraph each. Please include the sources (e.g. website or
+                            article title)
                             themselves too. Avoid using AI for this task.
                         </label>
 
@@ -235,7 +244,8 @@
                             wellbeing!
                         </div>
 
-                        <textarea id="essaycontent" placeholder="Type your arguments against the statements above here..." class="form-control"
+                        <textarea id="essaycontent"
+                            placeholder="Type your arguments against the statements above here..." class="form-control"
                             required name="content" rows="10" oninput="updateCharacterCount()"></textarea>
                         <div id="charCount" class="mt-2">0/400 characters</div>
 
@@ -303,6 +313,9 @@
             {% endif %}
             {% if session['user.lesson_cases'][lesson.id] == '3' %}
             <div>
+                <div class="alert alert-primary mt-3" role="alert">
+                    <strong class="me-3">Task</strong> Please chat with Forty the chatbot. Forty will help you learn more about this topic and teach you about some common misconceptions.
+                </div>
                 <div class="card" id="chat" style="height: 50vh; min-height: 650px;">
                     <div class="card-header d-flex justify-content-between align-items-center p-3">
                         <h5 class="mb-0">
@@ -427,7 +440,7 @@
                                     button.innerHTML = '<nobr>Continue (' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds + ')</nobr>';
                                 }
                             }
-                            
+
                             function clearTimer() {
                                 localStorage.removeItem('finishConvEndTime');
                             }
@@ -468,14 +481,19 @@
         {% endif %}
         {% if lesson_state == 2 %}
         <form method="POST" action="/likert/mid/{{ lesson.id }}">
-            <p style="font-size: 1.2em;" class="mb-5 mt-5">
-                After completing the prevous task, what do you think about the following statement?
+            <p class="mb-5 mt-5">
+                Please think again, what do you think about the following statement now?
             </p>
+
             <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
                 <span style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
                 <span class="m-5">{{ lesson.truth }}</span>
                 <span style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
             </p>
+
+            <div class="alert alert-primary mt-3" role="alert">
+                <strong class="me-3">Task</strong> Please select on this scale what you think about the statement above. Pay attention to the directions on the scale: left means you disagree, right means you agree.
+            </div>
             <div class="mt-5">
                 <style>
                     .scale-container {
@@ -572,9 +590,9 @@
 
         {% endif %}
         {% if lesson_state == 3 %}
-        <p style="font-size: 1.2em;" class="mb-3 mt-5">
-            Read the following carefully
-        </p>
+        <div class="alert alert-primary mt-3" role="alert">
+                <strong class="me-3">Task</strong> Please read the below text carefully. Pay attention as you may be asked questions about it later.
+            </div>
 
         <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
             <span style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
@@ -621,14 +639,19 @@
         {% endif %}
         {% if lesson_state == 4 %}
         <form method="POST" action="/likert/post/{{ lesson.id }}">
-            <p style="font-size: 1.2em;" class="mb-5 mt-5">
+            <p class="mb-5 mt-5">
                 What do you think about the following statement?
             </p>
+
             <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
                 <span style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
                 <span class="m-5">{{ lesson.truth }}</span>
                 <span style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
             </p>
+            <div class="alert alert-primary mt-3" role="alert">
+                 <strong class="me-3">Task</strong> 
+                    Please select on this scale what you think about the statement above. Pay attention to the directions on the scale: left means you disagree, right means you agree.
+                </div>
             <div class="mt-5">
                 <style>
                     .scale-container {
@@ -733,23 +756,21 @@
 
 
 
-            <div class="alert alert-danger mt-3" role="alert">
-                Please make sure that you completed the form above and see the <span style="font-style: italic;">"OK!
-                    You can now complete this lesson."</span> message. If you do not see that completion message, you
-                did not complete the form and you must not leave this lesson yet.
+            <div class="alert alert-primary mt-3" role="alert">
+                <strong class="me-3">Task</strong>You must fill out and submit the form above. When you have submitted it, a Lesson Completion Code will be shown to you, that you have to enter below to continue.
             </div>
 
-            <div class="form-check mt-4 text-center">
-                <label class="form-check-label" for="confirmSubmit">
-                    <input class="form-check-input" type="checkbox" value="" id="confirmSubmit">
-                    I have completed and submitted the form above.
-                </label>
+            <div class="form-group mt-4 text-center">
+                <label for="completionCode">Form Completion Code</label>
+                <input type="text" id="completionCode" class="form-control text-center"
+                    placeholder="Enter code to unlock Complete button">
             </div>
-
 
             <script>
-                document.getElementById('confirmSubmit').addEventListener('change', function () {
-                    document.getElementById('complete-btn').disabled = !this.checked;
+                document.getElementById('completionCode').addEventListener('input', function () {
+                    const code = this.value.trim();
+                    const button = document.getElementById('complete-btn');
+                    button.disabled = (code !== 'GOODJOB2025');
                 });
             </script>
 
