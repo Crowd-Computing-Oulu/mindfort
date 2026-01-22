@@ -167,4 +167,6 @@ static/.DS_Store
 
 database.db
 database/database.db
-.DS_Store
+*/.DS_Store
+**/**/.DS_Store
+

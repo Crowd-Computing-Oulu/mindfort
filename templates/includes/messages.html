@@ -1,41 +1,28 @@
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-        <div id="flash-messages" class="position-fixed top-3 end-0 p-3" style="z-index: 1050;">
+        <div id="flash-messages" class="toast toast-top toast-end mt-20 z-[1000]">
             {% for category, message in messages %}
-                <div class="toast align-items-center text-bg-{{ category }} border-0 mb-3 show" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            {{ message }}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                    <div class="progress" style="height: 4px;">
-                        <div class="progress-bar bg-white" role="progressbar" style="width: 100%;" id="progress-bar-{{ loop.index }}"></div>
-                    </div>
+                <div class="alert alert-{{ 'success' if category == 'success' else 'error' if category == 'danger' or category == 'error' else 'info' }} shadow-lg rounded-2xl border-0 flex items-center gap-2 pr-4 transition-all duration-300 transform translate-x-0" id="toast-{{ loop.index }}">
+                    <span>{{ message }}</span>
+                    <button type="button" class="btn btn-ghost btn-xs btn-circle" onclick="this.parentElement.remove()">✕</button>
                 </div>
             {% endfor %}
         </div>
     {% endif %}
 {% endwith %}
 
-
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const duration = 4000; // Time in milliseconds
-        const toasts = document.querySelectorAll('.toast');
+        const duration = 5000;
+        const flashMessages = document.querySelector('#flash-messages');
+        if (!flashMessages) return;
+
+        const alerts = flashMessages.querySelectorAll('.alert');
         
-        toasts.forEach((toast, index) => {
-            // Animate the progress bar
-            const progressBar = document.querySelector(`#progress-bar-${index + 1}`);
-            if (progressBar) {
-                progressBar.style.transition = `width ${duration}ms linear`;
-                progressBar.style.width = '0%';
-            }
-            
-            // Auto-dismiss after the specified duration
+        alerts.forEach((alert, index) => {
             setTimeout(() => {
-                toast.classList.remove('show');
-                toast.addEventListener('transitionend', () => toast.remove());
+                alert.classList.add('opacity-0', 'translate-x-full');
+                setTimeout(() => alert.remove(), 400);
             }, duration);
         });
     });

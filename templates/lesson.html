@@ -3,270 +3,215 @@
 
 {% include 'includes/head.html' %}
 
-<body class="d-flex flex-column min-vh-100">
+<body class="min-vh-100 flex flex-col bg-white font-sans bg-[#fafdff]">
     {% include 'includes/navbar.html' %}
 
     {% include 'includes/messages.html' %}
 
-    <div class="container-lg mb-5" style="min-height: 600px;">
-        <div class="row d-flex pt-3 justify-content-center">
-            <div class="col-md-10 col-lg-8 col-xl-6">
-                <a href="/" class="btn btn-link btn-sm mb-5">Back to topics</a>
-
-                <h1>
-                    <b>{{ topic|capitalize }} Lesson {{ lesson.id + 1 }}</b>
-                </h1>
-                <h2 class="mb-3">
-                    {{ lesson.title }}
-                </h2>
-                <p class="mb-5">
-                    {{ lesson.desc }}
-                    {% if session['user.lesson_cases'][lesson.id] == '0' %}
-                    In this lesson, you will not have to argue.
-                    {% endif %}
-                    {% if session['user.lesson_cases'][lesson.id] == '1' %}
-                    In this lesson, you will be shown an argument essay.
-                    {% endif %}
-                    {% if session['user.lesson_cases'][lesson.id] == '2' %}
-                    In this lesson, you will have to write an argument essay.
-                    {% endif %}
-                    {% if session['user.lesson_cases'][lesson.id] == '3' %}
-                    In this lesson, you will have to argue with Forty. Forty is an expert chatbot who was trained to be
-                    very knowledgeable about this topic.
-                    {% endif %}
-
-                </p>
-                <div class="d-flex justify-content-center mb-4">
-                    {% for stage in range(0, 5) %}
-                    <div class="d-flex align-items-center">
-                        <div class="progress-dot {% if stage <= lesson_state %}active{% endif %}">
-                            {{ stage + 1 }}
-                        </div>
-                        {% if stage < 4 %} <div class="progress-line {% if stage < lesson_state %}active{% endif %}">
-                    </div>
-                    {% endif %}
+    <main class="flex-grow pt-8 pb-10 px-4 md:px-6">
+        <div class="max-row mx-auto">
+            
+            <!-- Header: Space Efficient -->
+            <div class="mb-4 reveal flex items-center gap-4">
+                <a href="/" class="btn btn-ghost btn-circle btn-sm border-gray-100 hover:bg-gray-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                </a>
+                <div class="flex items-center gap-3">
+                    <div class="h-8 w-1 bg-primary rounded-full"></div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">MindFort Lesson</p>
                 </div>
-                {% endfor %}
             </div>
+
+            <div class="mb-8 reveal delay-1">
+                <div class="inline-block p-1 bg-blue-50 rounded-lg mb-2">
+                    <span class="text-primary font-bold px-2 py-0.5 text-[9px] tracking-wider uppercase">Lesson {{ lesson.id + 1 }}</span>
+                </div>
+                <h1 class="brand-h1 mb-1">
+                    {{ topic|capitalize }} {{ lesson.title }}
+                </h1>
+                <p class="text-sm text-gray-400 font-medium leading-relaxed">
+                    {{ lesson.desc }}
+                    {% if lesson_state == 0 %}
+                        <span class="text-primary ml-1 font-bold">Please select on the scale what you think about the statement below.</span>
+                    {% elif lesson_state == 1 %}
+                        {% if session['user.lesson_cases'][lesson.id] == '1' %}
+                            <span class="text-primary ml-1 font-bold">Please read the text below carefully.</span>
+                        {% elif session['user.lesson_cases'][lesson.id] == '2' %}
+                            <span class="text-primary ml-1 font-bold">Counter the misconceptions shown below.</span>
+                        {% elif session['user.lesson_cases'][lesson.id] == '3' %}
+                            <span class="text-primary ml-1 font-bold">Chat with Forty and see if you can spot the flaws in its logic!</span>
+                        {% endif %}
+                    {% elif lesson_state == 2 %}
+                        <span class="text-primary ml-1 font-bold">Select your revised position on the scale.</span>
+                    {% elif lesson_state == 3 %}
+                        <span class="text-primary ml-1 font-bold">Please read the text below carefully.</span>
+                    {% elif lesson_state == 4 %}
+                        <span class="text-primary ml-1 font-bold">Please select your final position on the scale.</span>
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Stepper: Compact -->
+            <div class="mb-8 reveal delay-2 bg-gray-50/50 border border-gray-100 p-3 rounded-2xl">
+            <ul class="steps steps-horizontal w-full font-black text-[10px] uppercase tracking-[0.2em] text-gray-300">
+                {% if is_public %}
+                    {% set public_stages = [0, 1, 4] %}
+                    {% set stage_labels = ['Belief', 'Interaction', 'Reflection'] %}
+                    {% for stage_val in public_stages %}
+                        <li class="step {% if lesson_state >= stage_val %}step-primary text-gray-900{% endif %}">
+                            {{ stage_labels[loop.index0] }}
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    {% set stage_labels = ['Initial', 'Evidence', 'Draft', 'Debate', 'Final'] %}
+                    {% for stage in range(0, 5) %}
+                        <li class="step {% if stage <= lesson_state %}step-primary text-gray-900{% endif %}">
+                            {{ stage_labels[stage] }}
+                        </li>
+                    {% endfor %}
+                {% endif %}
+            </ul>
+        </div>
             {% if lesson_state == 0 %}
-            <form method="POST" action="/likert/pre/{{ lesson.id }}">
-                <p style="font-size: 1.2em;" class="mb-5 mt-5">
-                    What do you think about the following statement?
-                </p>
-                <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
-                    <span style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
-                    <span class="m-5">{{ lesson.truth }}</span>
-                    <span style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
-                </p>
-
-                <div class="alert alert-primary mt-3" role="alert">
-                    <strong class="me-3">Task</strong> 
-                    Please select on this scale what you think about the statement above. Pay attention to the directions on the scale: left means you disagree, right means you agree.
+            <form method="POST" action="/likert/pre/{{ lesson.id }}" class="reveal delay-3">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-1.5 h-6 bg-primary rounded-full"></div>
+                    <h3 class="font-black text-sm text-gray-800 uppercase tracking-tight">Stage 1: Initial Belief</h3>
                 </div>
-                <div class="mt-5">
-                    <style>
-                        .scale-container {
-                            position: relative;
-                            width: 98%;
-                            margin-top: 20px;
-                            margin-left: 5px;
-                        }
 
-                        .scale-markers {
-                            position: absolute;
-                            width: 100%;
-                            top: -10px;
-                            left: 0;
-                            height: 20px;
-                        }
-
-                        .scale-markers::before {
-                            content: '';
-                            position: absolute;
-                            left: 0;
-                            right: 0;
-                            border-top: 2px solid #000;
-                            top: 50%;
-                            z-index: 1;
-                        }
-
-                        .scale-marker {
-                            position: absolute;
-                            top: 0;
-                            width: 2px;
-                            background-color: rgb(0, 0, 0);
-                            z-index: 2;
-                        }
-
-                        .marker-label {
-                            font-size: 0.75rem;
-                            text-align: center;
-                        }
-
-                        /* Define different heights for the markers */
-                        .scale-marker:nth-child(1),
-                        .scale-marker:nth-child(4),
-                        .scale-marker:nth-child(7),
-                        .scale-marker:nth-child(10),
-                        .scale-marker:nth-child(13),
-                        .scale-marker:nth-child(16) {
-                            height: 40px;
-                            /* Longer markers */
-                            width: 3px;
-                        }
-
-                        .scale-marker:not(:nth-child(1)):not(:nth-child(4)):not(:nth-child(7)):not(:nth-child(10)):not(:nth-child(13)):not(:nth-child(16)) {
-                            height: 20px;
-                            /* Regular markers */
-                        }
-                    </style>
-                    <input type="range"
-                        style="border: none; box-shadow: none; margin-left: 20px; width: 94%; margin-bottom: -15px;"
-                        class="form-range" id="belief-scale" name="likert_scale" min="1" max="15" step="1" required>
-                    <div class="scale-container">
-                        <div class="scale-markers">
-                            <!-- Create one scale marker for each position from 0 to 14 to show snap points -->
-                            <div class="scale-marker" style="left: 0%;"></div>
-                            <div class="scale-marker" style="left: 6.67%;"></div>
-                            <div class="scale-marker" style="left: 13.33%;"></div>
-                            <div class="scale-marker" style="left: 20%;"></div>
-                            <div class="scale-marker" style="left: 26.67%;"></div>
-                            <div class="scale-marker" style="left: 33.33%;"></div>
-                            <div class="scale-marker" style="left: 40%;"></div>
-                            <div class="scale-marker" style="left: 46.67%;"></div>
-                            <div class="scale-marker" style="left: 53.33%;"></div>
-                            <div class="scale-marker" style="left: 60%;"></div>
-                            <div class="scale-marker" style="left: 66.67%;"></div>
-                            <div class="scale-marker" style="left: 73.33%;"></div>
-                            <div class="scale-marker" style="left: 80%;"></div>
-                            <div class="scale-marker" style="left: 86.67%;"></div>
-                            <div class="scale-marker" style="left: 93.33%;"></div>
-                            <div class="scale-marker" style="left: 100%;"></div>
-                        </div>
-                    </div>
-
-                    
-                    <div class="d-flex justify-content-between mt-5" style="margin-left: 35px; margin-right: 35px;">
-                        <span class="marker-label">Definitely<br> FALSE</span>
-                        <span class="marker-label">Probably<br> FALSE</span>
-                        <span class="marker-label">Uncertain</span>
-                        <span class="marker-label">Probably<br> TRUE</span>
-                        <span class="marker-label">Definitely <br>TRUE</span>
-                    </div>
+                <div class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm mb-6 text-center">
+                    <p class="text-[11px] text-gray-400 uppercase tracking-widest font-bold mb-4">Statement of Truth</p>
+                    <p class="text-xl md:text-2xl font-black text-gray-900 leading-tight italic-off">
+                        “{{ lesson.truth }}”
+                    </p>
                 </div>
-                <div class="text-center">
-                    <button type="submit" class="btn btn-primary mt-5">Submit</button>
+
+
+                <div class="px-2">
+                    {% include 'includes/likert_scale.html' %}
+                </div>
+
+                <div class="text-center mt-6 pb-8">
+                    <button type="submit" class="btn btn-primary btn-sm rounded-full px-8 shadow-md hover:shadow-lg transition-all text-white font-bold uppercase tracking-widest text-[10px]">
+                        Submit Initial Belief
+                    </button>
                 </div>
             </form>
             {% endif %}
             {% if lesson_state == 1 %}
-            {% if session['user.lesson_cases'][lesson.id] == '0' %}
-            <div class="text-center">
-                In this lesson, the second step is skipped. Please continue to the next stage.
-                <form action="/finish_stage" method="POST">
-                    <input type="hidden" name="id" value="{{lesson.id}}">
-                    <button type="submit" class="btn btn-primary mt-5">Continue</button>
-                </form>
-            </div>
-            {% endif %}
-            {% if session['user.lesson_cases'][lesson.id] == '1' %}
-           
-
-                
-
-            <div class="alert alert-primary m-5" role="alert">
-               <strong class="me-3">Task</strong> Please read the below text carefully. Pay attention as you may be asked questions about it later.
-            </div>
-           
-            <p class="bg-light p-3 rounded-3 position-relative" style="line-height: 1.8em;">
-                <span style="font-size: 3em; position: absolute; left: 10px; top: 5px; ">“</span>
-                <span class="m-5">{{ lesson.refutation_essay | safe }}</span>
-                <span style="font-size: 3em; position: absolute; right: 10px; bottom: -30px; ">”</span>
-            </p>
-
-            <div class="text-center">
-                <form action="/finish_stage" method="POST">
-                    <input type="hidden" name="id" value="{{lesson.id}}">
-                    <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2"
-                        disabled>Continue (3:00)</button>
-                    <p class="small">Please read the text carefully for at least 3 minutes before continuing. The timer
-                        resets if you leave or reload this page.</p>
-                </form>
-            </div>
-
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    var button = document.getElementById('continueButton');
-                    var countdownTime = 3 * 60; // 5 minutes in seconds
-
-                    // Disable the button initially
-                    button.disabled = true;
-
-                    var timer = setInterval(function () {
-                        if (countdownTime <= 0) {
-                            clearInterval(timer);
-                            button.disabled = false;
-                            button.textContent = 'Continue';
-                        } else {
-                            countdownTime--;
-                            // Format the remaining time
-                            var minutes = Math.floor(countdownTime / 60);
-                            var seconds = countdownTime % 60;
-                            button.textContent = 'Continue (' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds + ')';
-                        }
-                    }, 1000); // Timer intervals every second
-                });
-            </script>
-            {% endif %}
-            {% if session['user.lesson_cases'][lesson.id] == '2' %}
-            <div>
-                <form id="argEssayForm" action="/submit_essay?id={{ lesson.id }}" method="POST">
-                    <div class="mb-3">
-
-                        <p class="bg-light p-3 rounded-3 position-relative"
-                            style="font-style: italic; font-size: 1.1em;">
-                            <span style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
-                            <span class="m-5">{{ lesson.weakargument_written | safe }}</span>
-                            <span style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
-                        </p>
-
-                        <label for="exampleFormControlTextarea1" class="form-label">
-                            
-                        </label>
-
-                        <div class="alert alert-primary mt-3" role="alert">
-                            <strong class="me-3">Task</strong>In this task, you see four common misconceptions above about the current topic. Please find and use resources that support your own belief and disprove those four arguments. If you do well, you might even find information that improves your own habits and wellbeing! Please use online resources, search, scientific articles etc. but avoid using AI. Please also include the sources for your own counterarguments if possible.
-                        </div>
-
-                        <textarea id="essaycontent"
-                            placeholder="Type your arguments against the statements above here..." class="form-control"
-                            required name="content" rows="10" oninput="updateCharacterCount()"></textarea>
-                        <div id="charCount" class="mt-2">0/400 characters</div>
-
-                        <!-- TODO: add this back -->
-                        <!-- <label for="exampleFormControlTextarea1" class="form-label mt-4">
-                          Please briefly tell what resource(s) you used and how.
-                        </label>
-                        <textarea id="essaycontent" placeholder="Type your answer here..." class="form-control" required name="resources" rows="2" oninput="updateCharacterCount()"></textarea> -->
-
-
+                {% if session['user.lesson_cases'][lesson.id] == '0' %}
+                <div class="text-center py-12 reveal">
+                    <div class="mb-6 opacity-40">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
                     </div>
-                    <div class="text-center">
+                    <p class="text-gray-500 font-medium mb-8">In this lesson, the second step is skipped. Please continue to the next stage.</p>
+                    <form action="/finish_stage" method="POST">
+                        <input type="hidden" name="id" value="{{lesson.id}}">
+                        <button type="submit" class="btn btn-primary rounded-full px-12 py-4 h-auto shadow-md hover:shadow-lg transition-all text-white font-bold uppercase tracking-widest text-xs">Continue</button>
+                    </form>
+                </div>
+                {% endif %}
+
+                {% if session['user.lesson_cases'][lesson.id] == '1' %}
+                <div class="reveal">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-1.5 h-6 bg-primary rounded-full"></div>
+                        <h3 class="font-black text-sm text-gray-800 uppercase tracking-tight">Stage 2: Critical Reading</h3>
+                    </div>
+
+                   
+                    <div class="relative group mb-10">
+                        <div class="absolute -inset-1 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl blur opacity-25"></div>
+                        <div class="relative bg-white p-6 md:p-10 rounded-2xl border border-gray-100 shadow-sm leading-relaxed text-gray-700">
+                            <span class="text-6xl text-primary/5 font-serif absolute top-4 left-6">“</span>
+                            <div class="prose prose-blue max-w-none text-lg">
+                                {{ lesson.refutation_essay | safe }}
+                            </div>
+                            <span class="text-6xl text-primary/5 font-serif absolute bottom-0 right-6">”</span>
+                        </div>
+                    </div>
+
+                    <div class="text-center pb-6">
                         <form action="/finish_stage" method="POST">
                             <input type="hidden" name="id" value="{{lesson.id}}">
-                            <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2"
-                                disabled>Continue (5:00)</button>
+                            <button id="continueButton" {% if not is_public %}disabled{% endif %} type="submit" class="btn btn-primary btn-sm rounded-full px-10 shadow-md hover:shadow-lg transition-all text-white font-bold uppercase tracking-widest text-[10px] disabled:opacity-30">
+                                Continue {{ '(3:00)' if not is_public else '' }}
+                            </button>
+                            {% if not is_public %}
+                            <p class="text-gray-400 text-[10px] mt-6 font-medium max-w-sm mx-auto opacity-70">
+                                Please read carefully for at least 3 minutes before continuing.
+                            </p>
+                            {% endif %}
                         </form>
-                        <p class="small mt-3 ms-3 me-3">Please work on this task for at least 5 minutes before
-                            continuing. The timer resets if you leave or reload this page.</p>
+                    </div>
+                </div>
+
+                {% if not is_public %}
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var button = document.getElementById('continueButton');
+                        var countdownTime = 3 * 60; 
+                        button.disabled = true;
+
+                        var timer = setInterval(function () {
+                            if (countdownTime <= 0) {
+                                clearInterval(timer);
+                                button.disabled = false;
+                                button.textContent = 'Continue';
+                            } else {
+                                countdownTime--;
+                                var minutes = Math.floor(countdownTime / 60);
+                                var seconds = countdownTime % 60;
+                                button.textContent = 'Continue (' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds + ')';
+                            }
+                        }, 1000);
+                    });
+                </script>
+                {% endif %}
+                {% endif %}
+                {% if session['user.lesson_cases'][lesson.id] == '2' %}
+                <div class="reveal">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-1.5 h-6 bg-primary rounded-full"></div>
+                        <h3 class="font-black text-sm text-gray-800 uppercase tracking-tight">Stage 2: Counter-Argument</h3>
                     </div>
 
+
+                    <div class="mb-6">
+                        <div class="bg-white p-6 rounded-2xl border border-gray-100 italic font-medium text-gray-600 leading-relaxed shadow-sm relative">
+                            <span class="text-5xl text-primary/5 font-serif absolute top-2 left-4">“</span>
+                            {{ lesson.weakargument_written | safe }}
+                            <span class="text-5xl text-primary/5 font-serif absolute bottom-0 right-4">”</span>
+                        </div>
+                    </div>
+
+                    <form id="argEssayForm" action="/submit_essay?id={{ lesson.id }}" method="POST">
+                        <textarea id="essaycontent" 
+                            class="textarea textarea-bordered w-full h-64 rounded-3xl p-8 text-base font-medium focus:border-primary transition-all shadow-sm bg-white" 
+                            placeholder="Type your arguments against the statements above here..." 
+                            required name="content" oninput="updateCharacterCount()"></textarea>
+                        
+                        <div class="flex justify-between items-center mt-4 mb-12 px-2">
+                            <div id="charCount" class="text-[10px] font-black text-gray-400 uppercase tracking-widest">0 / 400 characters</div>
+                            <div class="text-[10px] text-gray-400 italic font-medium">Auto-saving enabled</div>
+                        </div>
+
+                        <div class="text-center pb-6">
+                            <input type="hidden" name="id" value="{{lesson.id}}">
+                            <button id="continueButton" {% if not is_public %}disabled{% endif %} type="submit" class="btn btn-primary btn-sm rounded-full px-10 shadow-md hover:shadow-lg transition-all text-white font-bold uppercase tracking-widest text-[10px] disabled:opacity-30">
+                                Continue {{ '(5:00)' if not is_public else '' }}
+                            </button>
+                            {% if not is_public %}
+                            <p class="text-gray-400 text-[10px] mt-6 font-medium max-w-sm mx-auto opacity-70">
+                                Work for at least 5 minutes before continuing.
+                            </p>
+                            {% endif %}
+                        </div>
+                    {% if not is_public %}
                     <script>
                         document.addEventListener('DOMContentLoaded', function () {
                             var button = document.getElementById('continueButton');
-                            var countdownTime = 5 * 60; // 5 minutes in seconds
-
-                            // Disable the button initially
+                            var countdownTime = 5 * 60;
                             button.disabled = true;
 
                             var timer = setInterval(function () {
@@ -276,16 +221,17 @@
                                     button.textContent = 'Continue';
                                 } else {
                                     countdownTime--;
-                                    // Format the remaining time
                                     var minutes = Math.floor(countdownTime / 60);
                                     var seconds = countdownTime % 60;
                                     button.textContent = 'Continue (' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds + ')';
                                 }
-                            }, 1000); // Timer intervals every second
+                            }, 1000);
                         });
                     </script>
-                </form>
-            </div>
+                    {% endif %}
+                    </form>
+                </div>
+                {% endif %}
 
             <script>
                 function updateCharacterCount() {
@@ -304,481 +250,263 @@
                 }
             </script>
 
-            {% endif %}
-            {% if session['user.lesson_cases'][lesson.id] == '3' %}
-            <div>
-                <div class="alert alert-primary mt-3" role="alert">
-                    <strong class="me-3">Task</strong> Please chat with Forty the chatbot. Forty will help you learn more about this topic and teach you about some common misconceptions.
+                {% if session['user.lesson_cases'][lesson.id] == '3' %}
+                <div class="reveal">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-1.5 h-6 bg-primary rounded-full"></div>
+                        <h3 class="font-black text-sm text-gray-800 uppercase tracking-tight">Stage 2: Debate Forty</h3>
+                    </div>
+
                 </div>
-                <div class="card" id="chat" style="height: 50vh; min-height: 650px;">
-                    <div class="card-header d-flex justify-content-between align-items-center p-3">
-                        <h5 class="mb-0">
-                            <b>Forty</b>
 
-                            {% if session['user.level'] < lesson.id + 1%} <span class="ms-5 text-muted small">
-                                <span
-                                    style="display: inline-block; width: 10px; height: 10px; background-color: green; border-radius: 50%; margin-right: 5px;"></span>
-                                Online
-                                </span>
-                                {% else %}
-                                <span class="ms-5 text-muted small">
-                                    <span
-                                        style="display: inline-block; width: 10px; height: 10px; background-color: red; border-radius: 50%; margin-right: 5px;"></span>
-                                    Offline
-                                </span>
-                                {% endif %}
-                        </h5>
-
-                        <div class="btn-group">
-                            <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                                aria-expanded="false">
-                                Options
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li> <a class="dropdown-item" href="/erase_conv?id={{ lesson.id }}"
-                                        onclick="return confirm('Are you sure you want to erase this conversation? This action cannot be undone.');">
-                                        Reset conversation
-                                    </a></li>
+                <div class="flex flex-col h-[550px] bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-6 relative group reveal delay-1">
+                    <div class="absolute -inset-1 bg-gradient-to-b from-primary/5 to-transparent opacity-50 pointer-events-none"></div>
+                    
+                    <div class="p-2 border-b border-gray-50 flex justify-between items-center bg-white/80 backdrop-blur-md z-10">
+                        <div class="flex items-center gap-2">
+                            <div class="relative">
+                                <img src="/static/img/chat-forty.png" class="w-6 h-6 rounded-lg shadow-sm border border-gray-100" />
+                                <div class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 border-2 border-white rounded-full"></div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 tracking-tight text-xs">Forty</h3>
+                                <p class="text-[8px] font-bold uppercase tracking-widest text-green-500 opacity-80">Online</p>
+                            </div>
+                        </div>
+                        
+                        <div class="dropdown dropdown-end">
+                            <label tabindex="0" class="btn btn-ghost btn-circle btn-sm opacity-40 hover:opacity-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
+                            </label>
+                            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-xl bg-white rounded-2xl w-52 border border-gray-50 font-bold text-xs uppercase tracking-widest text-gray-400">
+                                <li>
+                                    <a class="text-error" href="/erase_conv?id={{ lesson.id }}" onclick="return confirm('Erase everything?');">Reset Session</a>
+                                </li>
                             </ul>
                         </div>
-
                     </div>
 
-                    <div id="chat-body" class="card-body overflow-y-scroll h-50">
+                    <div id="chat-body" class="flex-grow overflow-y-auto p-3 md:p-4 space-y-2 bg-gray-50/20 scroll-smooth">
                         {% if messages|length == 1 %}
-                        <div id="sayhi_text" class="d-flex flex-column justify-content-center align-items-center h-100">
-                            <p class="text-muted">Say hi to start the conversation!</p>
-                        </div>
+                            <div id="sayhi_text" class="flex flex-col items-center justify-center h-full opacity-40">
+                                <div class="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center mb-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                                </div>
+                                <p class="font-bold text-sm tracking-widest uppercase">Say hi to Forty!</p>
+                            </div>
                         {% else %}
-                        {% for message in messages %}
-                        {% if message.role == "user" %}
-                        <div class="d-flex flex-row justify-content-end mb-4 pt-1">
-                            <div>
-                                <p style="max-width: 400px; cursor: pointer;"
-                                    class="small p-2 me-3 mb-1 text-white rounded-4 bg-primary" data-bs-toggle="popover"
-                                    tabindex="0" data-bs-html="true" data-bs-trigger="focus"
-                                    title="Message ID {{message.id}}"
-                                    data-bs-content="<a href='feedback?id={{message.id}}' class='btn btn-sm btn-primary me-2'>Feedback</a><a href='redact?id={{message.id}}' class='btn btn-sm btn-danger me-2'>Redact</a>">
-                                    {{ message.content }}
-                                </p>
-                            </div>
-                            <img src="static/img/chat-user.png" alt="user avatar" class="sha"
-                                style="width: 45px; height: 100%; margin-top: -4px;">
-                        </div>
-                        {% elif message.role == "assistant" %}
-                        <div class="d-flex flex-row justify-content-start mb-4">
-                            <img src="static/img/chat-forty.png" alt="assistant avatar"
-                                style="width: 45px; height: 100%; margin-top: -5px">
-                            <div>
-                                <p class="small p-2 ms-3 mb-1 rounded-4 bg-body-tertiary"
-                                    style="max-width: 400px; cursor: pointer;" data-bs-toggle="popover" tabindex="0"
-                                    data-bs-html="true" data-bs-trigger="focus" title="Message ID {{message.id}}"
-                                    data-bs-content="<a href='feedback?id={{message.id}}' class='btn btn-sm btn-primary me-2'>Feedback</a><a href='redact?id={{message.id}}' class='btn btn-sm btn-danger me-2'>Redact</a>">
-                                    {{ message.content }}
-                                </p>
-                            </div>
-                        </div>
-                        {% endif %}
-                        {% endfor %}
+                            {% for message in messages %}
+                                {% if message.role == "user" %}
+                                    <div class="chat chat-end animate-in slide-in-from-right-2 duration-300">
+                                        <div class="chat-image avatar">
+                                            <div class="w-6 rounded-lg bg-blue-50">
+                                                <img alt="User" src="/static/img/chat-user.png" />
+                                            </div>
+                                        </div>
+                                        <div class="chat-header text-[8px] font-black uppercase tracking-widest opacity-25 mb-0.5">You</div>
+                                        <div class="chat-bubble chat-bubble-primary rounded-xl text-xs font-medium leading-tight py-2 px-3 shadow-none min-h-0" 
+                                             data-bs-toggle="popover" tabindex="0" data-bs-html="true" data-bs-trigger="focus" 
+                                             title="Options" data-bs-content="<a href='feedback?id={{message.id}}' class='btn btn-xs btn-primary'>Feedback</a>">
+                                            {{ message.content }}
+                                        </div>
+                                    </div>
+                                {% elif message.role == "assistant" %}
+                                    <div class="chat chat-start animate-in slide-in-from-left-2 duration-300">
+                                        <div class="chat-image avatar">
+                                            <div class="w-6 rounded-lg shadow-sm border border-gray-100">
+                                                <img alt="Forty" src="/static/img/chat-forty.png" />
+                                            </div>
+                                        </div>
+                                        <div class="chat-header text-[8px] font-black uppercase tracking-widest text-primary opacity-60 mb-0.5">Forty</div>
+                                        <div class="chat-bubble bg-gray-100 border-0 text-gray-800 rounded-xl text-xs font-medium leading-tight py-2 px-3 shadow-none min-h-0"
+                                             data-bs-toggle="popover" tabindex="0" data-bs-html="true" data-bs-trigger="focus"
+                                             title="Options" data-bs-content="<a href='feedback?id={{message.id}}' class='btn btn-xs btn-primary'>Feedback</a>">
+                                            {{ message.content }}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
                         {% endif %}
                     </div>
 
-                    {% if session['user.level'] < lesson.id + 1 %} <div
-                        class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
-                        <input type="text" class="form-control form-control ms-2 me-4" id="exampleFormControlInput1"
-                            placeholder="Type message">
-                        <button id="sendButton" class="btn btn-small rounded-pill shadow btn-primary text-center"
-                            style="width: 100px;">
-                            <img src="static/img/paperplane.fill.png" width="24px" style="margin-bottom: 2px;">
-                        </button>
-                </div>
-                <div class="card-footer text-muted d-flex justify-content-between align-items-center p-0">
-                    <div>
-                        <form action="/finish_conv?id={{ lesson.id }}" method="GET">
-                            <input type="hidden" name="id" value="{{lesson.id}}">
-                            <button id="finishConvButton" disabled class="btn btn-outline-success btn-sm m-2" disabled>
-                                <nobr>Continue (10:00)</nobr>
-                            </button>
-                        </form>
+                    <div class="p-2 bg-white border-t border-gray-50 z-10">
+                        <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-lg border border-gray-100 focus-within:border-primary/30 focus-within:bg-white transition-all">
+                            <input type="text" id="exampleFormControlInput1" class="flex-grow bg-transparent border-0 focus:ring-0 px-2 py-1 text-xs font-semibold placeholder:text-gray-400" placeholder="Type here..." />
+                            <div class="flex items-center gap-1.5 pr-1">
+                                <span class="px-1.5 py-0.5 bg-gray-200 text-gray-600 text-[9px] font-bold rounded border border-gray-300 shadow-sm antialiased">↵</span>
+                                <button id="sendButton" class="btn btn-primary btn-circle btn-xs w-7 h-7 min-h-0 shadow-sm transform active:scale-95 transition-all flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 -rotate-45 -mr-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-2 flex items-center justify-between gap-2 border-t border-gray-50 pt-2">
+                            <div class="flex-grow">
+                                <p class="text-[9px] font-medium text-gray-400 opacity-80 uppercase tracking-widest">
+                                    {% if is_public %}Ready?{% else %}10m session required{% endif %}
+                                </p>
+                            </div>
+                            <form action="/finish_conv?id={{ lesson.id }}" method="GET">
+                                <input type="hidden" name="id" value="{{lesson.id}}">
+                                <button id="finishConvButton" {% if not is_public %}disabled{% endif %} class="btn btn-primary btn-xs rounded-lg px-4 shadow-sm text-white font-black uppercase tracking-widest text-[8px] disabled:opacity-30">
+                                    Continue
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                    <p class="small mt-3 ms-3 me-3">Please converse with Forty for at least ten minutes before
-                        continuing, but no more than five minutes for each argument he presents. The timer resets if you
-                        leave or reload this page.</p>
+                </div>
+
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-12 opacity-60 leading-relaxed">
+                        Session is strictly anonymized for academic research. <br>
+                        <a href="/dataprocessing" class="text-primary hover:underline underline-offset-4">Data Processing Policy &rarr;</a>
+                    </p>
+                </div>
+                {% endif %}
+            {% endif %}
+
+            {% if lesson_state == 2 %}
+            <div class="reveal">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="w-1.5 h-6 bg-primary rounded-full"></div>
+                    <h3 class="font-black text-sm text-gray-800 uppercase tracking-tight">Stage 3: Reflection</h3>
+                </div>
+
+                <div class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm mb-6 text-center relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                    <p class="text-[11px] text-gray-400 uppercase tracking-widest font-bold mb-4">Re-evaluating Statement</p>
+                    <p class="text-xl md:text-2xl font-black text-gray-900 leading-tight">
+                        “{{ lesson.truth }}”
+                    </p>
+                </div>
+
+
+                <form method="POST" action="/likert/mid/{{ lesson.id }}">
+                    <div class="px-2 mb-12">
+                        {% include 'includes/likert_scale.html' %}
+                    </div>
+                    <div class="text-center mt-6 pb-8">
+                        <button type="submit" class="btn btn-primary btn-sm rounded-full px-10 shadow-md hover:shadow-lg transition-all text-white font-bold uppercase tracking-widest text-[10px]">
+                            Submit reflection
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+        {% if lesson_state == 3 %}
+        <div class="reveal">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-1.5 h-6 bg-primary rounded-full"></div>
+                <h3 class="font-black text-sm text-gray-800 uppercase tracking-tight">Stage 4: Evidence Synthesis</h3>
+            </div>
+
+
+            <div class="relative group mb-12">
+                <div class="absolute -inset-1 bg-gradient-to-r from-secondary/10 to-primary/10 rounded-2xl blur opacity-25"></div>
+                <div class="relative bg-white p-6 md:p-10 rounded-2xl border border-gray-100 shadow-sm leading-relaxed text-gray-700">
+                    <span class="text-6xl text-primary/5 font-serif absolute top-4 left-6">“</span>
+                    <div class="prose prose-blue max-w-none text-lg italic font-medium">
+                        {{ lesson.strongargument_written | safe }}
+                    </div>
+                    <span class="text-6xl text-primary/5 font-serif absolute bottom-0 right-6">”</span>
+                </div>
+            </div>
+
+            <div class="text-center mt-6 pb-8">
+                <form action="/finish_stage" method="POST">
+                    <input type="hidden" name="id" value="{{lesson.id}}">
+                    <button id="continueButtonStage4" {% if not is_public %}disabled{% endif %} type="submit" class="btn btn-primary btn-sm rounded-full px-10 shadow-md hover:shadow-lg transition-all text-white font-bold uppercase tracking-widest text-[10px] disabled:opacity-30">
+                        Continue {{ '(3:00)' if not is_public else '' }}
+                    </button>
+                    {% if not is_public %}
+                    <p class="text-gray-400 text-[10px] mt-6 font-medium max-w-sm mx-auto opacity-70">
+                        Please read carefully for at least 3 minutes before continuing.
+                    </p>
                     <script>
                         document.addEventListener('DOMContentLoaded', function () {
-                            var button = document.getElementById('finishConvButton');
-                            var totalDuration = 10 * 60; // 10 minutes in seconds
-                            var now = Date.now();
+                            var button = document.getElementById('continueButtonStage4');
+                            var countdownTime = 3 * 60; 
+                            button.disabled = true;
 
-                            // Get or set the end time
-                            var endTime = localStorage.getItem('finishConvEndTime');
-                            if (!endTime) {
-                                endTime = now + totalDuration * 1000;
-                                localStorage.setItem('finishConvEndTime', endTime);
-                            } else {
-                                endTime = parseInt(endTime);
-                            }
-
-                            function updateTimer() {
-                                var remaining = Math.floor((endTime - Date.now()) / 1000);
-
-                                if (remaining <= 0) {
+                            var timer = setInterval(function () {
+                                if (countdownTime <= 0) {
                                     clearInterval(timer);
-                                    localStorage.removeItem('finishConvEndTime'); // Clean up
                                     button.disabled = false;
                                     button.textContent = 'Continue';
                                 } else {
-                                    button.disabled = true;
-                                    var minutes = Math.floor(remaining / 60);
-                                    var seconds = remaining % 60;
-                                    button.innerHTML = '<nobr>Continue (' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds + ')</nobr>';
+                                    countdownTime--;
+                                    var minutes = Math.floor(countdownTime / 60);
+                                    var seconds = countdownTime % 60;
+                                    button.textContent = 'Continue (' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds + ')';
                                 }
-                            }
-
-                            function clearTimer() {
-                                localStorage.removeItem('finishConvEndTime');
-                            }
-
-                            // Clear timer on button click
-                            button.addEventListener('click', clearTimer);
-
-                            updateTimer(); // Call once immediately
-                            var timer = setInterval(updateTimer, 1000);
+                            }, 1000);
                         });
                     </script>
-
-                </div>
-                {% else %}
-                <div class=" disabled card-footer text-muted d-flex justify-content-start align-items-center p-3">
-                    <input type="text" disabled class="form-control form-control ms-2 me-4" placeholder="Type message">
-                    <button disabled class="btn disabled btn-small rounded-pill shadow btn-primary text-center"
-                        style="width: 100px;">
-                        <img src="static/img/paperplane.fill.png" width="24px" style="margin-bottom: 2px;">
-                    </button>
-                </div>
-                <div class="card-footer text-muted d-flex justify-content-between align-items-center p-0">
-                    <div>
-                        <a disabled class="btn disabled btn-outline-success btn-sm m-2">
-                            Continue
-                        </a>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-            <p class="text-muted text-center small mt-3 align-self-center">
-                Your conversation will be anonymised and analysed by scientists, unless you opt out.<br>Learn more <a
-                    href="/dataprocessing">here</a>.
-            </p>
-        </div>
-        {% endif %}
-
-        {% endif %}
-        {% if lesson_state == 2 %}
-        <form method="POST" action="/likert/mid/{{ lesson.id }}">
-            <p class="mb-5 mt-5">
-                Please think again, what do you think about the following statement now?
-            </p>
-
-            <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
-                <span style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
-                <span class="m-5">{{ lesson.truth }}</span>
-                <span style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
-            </p>
-
-            <div class="alert alert-primary mt-3" role="alert">
-                <strong class="me-3">Task</strong> Please select on this scale what you think about the statement above. Pay attention to the directions on the scale: left means you disagree, right means you agree.
-            </div>
-            <div class="mt-5">
-                <style>
-                    .scale-container {
-                        position: relative;
-                        width: 98%;
-                        margin-top: 20px;
-                        margin-left: 5px;
-                    }
-
-                    .scale-markers {
-                        position: absolute;
-                        width: 100%;
-                        top: -10px;
-                        left: 0;
-                        height: 20px;
-                    }
-
-                    .scale-markers::before {
-                        content: '';
-                        position: absolute;
-                        left: 0;
-                        right: 0;
-                        border-top: 2px solid #000;
-                        top: 50%;
-                        z-index: 1;
-                    }
-
-                    .scale-marker {
-                        position: absolute;
-                        top: 0;
-                        width: 2px;
-                        background-color: rgb(0, 0, 0);
-                        z-index: 2;
-                    }
-
-                    .marker-label {
-                        font-size: 0.75rem;
-                        text-align: center;
-                    }
-
-                    /* Define different heights for the markers */
-                    .scale-marker:nth-child(1),
-                    .scale-marker:nth-child(4),
-                    .scale-marker:nth-child(7),
-                    .scale-marker:nth-child(10),
-                    .scale-marker:nth-child(13),
-                    .scale-marker:nth-child(16) {
-                        height: 40px;
-                        /* Longer markers */
-                        width: 3px;
-                    }
-
-                    .scale-marker:not(:nth-child(1)):not(:nth-child(4)):not(:nth-child(7)):not(:nth-child(10)):not(:nth-child(13)):not(:nth-child(16)) {
-                        height: 20px;
-                        /* Regular markers */
-                    }
-                </style>
-                <input type="range"
-                    style="border: none; box-shadow: none; margin-left: 20px; width: 94%; margin-bottom: -15px;"
-                    class="form-range" id="belief-scale" name="likert_scale" min="1" max="15" step="1" required>
-                <div class="scale-container">
-                    <div class="scale-markers">
-                        <!-- Create one scale marker for each position from 0 to 14 to show snap points -->
-                        <div class="scale-marker" style="left: 0%;"></div>
-                        <div class="scale-marker" style="left: 6.67%;"></div>
-                        <div class="scale-marker" style="left: 13.33%;"></div>
-                        <div class="scale-marker" style="left: 20%;"></div>
-                        <div class="scale-marker" style="left: 26.67%;"></div>
-                        <div class="scale-marker" style="left: 33.33%;"></div>
-                        <div class="scale-marker" style="left: 40%;"></div>
-                        <div class="scale-marker" style="left: 46.67%;"></div>
-                        <div class="scale-marker" style="left: 53.33%;"></div>
-                        <div class="scale-marker" style="left: 60%;"></div>
-                        <div class="scale-marker" style="left: 66.67%;"></div>
-                        <div class="scale-marker" style="left: 73.33%;"></div>
-                        <div class="scale-marker" style="left: 80%;"></div>
-                        <div class="scale-marker" style="left: 86.67%;"></div>
-                        <div class="scale-marker" style="left: 93.33%;"></div>
-                        <div class="scale-marker" style="left: 100%;"></div>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-between mt-5" style="margin-left: 35px; margin-right: 35px;">
-                    <span class="marker-label">Definitely<br> FALSE</span>
-                    <span class="marker-label">Probably<br> FALSE</span>
-                    <span class="marker-label">Uncertain</span>
-                    <span class="marker-label">Probably<br> TRUE</span>
-                    <span class="marker-label">Definitely <br>TRUE</span>
-                </div>
-            </div>
-            <div class="text-center">
-                <button type="submit" class="btn btn-primary mt-5">Submit</button>
-            </div>
-        </form>
-
-        {% endif %}
-        {% if lesson_state == 3 %}
-        <div class="alert alert-primary mt-3" role="alert">
-                <strong class="me-3">Task</strong> Please read the below text carefully. Pay attention as you may be asked questions about it later.
-            </div>
-
-        <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
-            <span style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
-            <span class="m-5">{{ lesson.strongargument_written | safe }}</span>
-            <span style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
-        </p>
-
-        <div class="text-center">
-            <div class="text-center">
-                <form action="/finish_stage" method="POST">
-                    <input type="hidden" name="id" value="{{lesson.id}}">
-                    <button id="continueButton" disabled type="submit" class="btn btn-primary mt-5 mb-2"
-                        disabled>Continue (3:00)</button>
-                    <p class="small">Please read the text carefully for at least 3 minutes before continuing. The timer
-                        resets if you leave or reload this page.</p>
+                    {% endif %}
                 </form>
             </div>
-
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    var button = document.getElementById('continueButton');
-                    var countdownTime = 3 * 60; // 5 minutes in seconds
-
-                    // Disable the button initially
-                    button.disabled = true;
-
-                    var timer = setInterval(function () {
-                        if (countdownTime <= 0) {
-                            clearInterval(timer);
-                            button.disabled = false;
-                            button.textContent = 'Continue';
-                        } else {
-                            countdownTime--;
-                            // Format the remaining time
-                            var minutes = Math.floor(countdownTime / 60);
-                            var seconds = countdownTime % 60;
-                            button.textContent = 'Continue (' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds + ')';
-                        }
-                    }, 1000); // Timer intervals every second
-                });
-            </script>
         </div>
-
         {% endif %}
         {% if lesson_state == 4 %}
-        <form method="POST" action="/likert/post/{{ lesson.id }}">
-            <p class="mb-5 mt-5">
-                What do you think about the following statement?
-            </p>
+        <div class="reveal">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-1.5 h-6 bg-primary rounded-full"></div>
+                <h3 class="font-black text-sm text-gray-800 uppercase tracking-tight">Stage 5: Final Position</h3>
+            </div>
 
-            <p class="bg-light p-3 rounded-3 position-relative" style="font-style: italic; font-size: 1.1em;">
-                <span style="font-size: 3em; position: absolute; left: 10px; top: -10px; ">“</span>
-                <span class="m-5">{{ lesson.truth }}</span>
-                <span style="font-size: 3em; position: absolute; right: 10px; bottom: -50px; ">”</span>
-            </p>
-            <div class="alert alert-primary mt-3" role="alert">
-                 <strong class="me-3">Task</strong> 
-                    Please select on this scale what you think about the statement above. Pay attention to the directions on the scale: left means you disagree, right means you agree.
-                </div>
-            <div class="mt-5">
-                <style>
-                    .scale-container {
-                        position: relative;
-                        width: 98%;
-                        margin-top: 20px;
-                        margin-left: 5px;
-                    }
+            <div class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm mb-6 text-center relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                <p class="text-[11px] text-gray-400 uppercase tracking-widest font-bold mb-4">Final Conviction Check</p>
+                <p class="text-xl md:text-2xl font-black text-gray-900 leading-tight">
+                    “{{ lesson.truth }}”
+                </p>
+            </div>
 
-                    .scale-markers {
-                        position: absolute;
-                        width: 100%;
-                        top: -10px;
-                        left: 0;
-                        height: 20px;
-                    }
+        </div>
 
-                    .scale-markers::before {
-                        content: '';
-                        position: absolute;
-                        left: 0;
-                        right: 0;
-                        border-top: 2px solid #000;
-                        top: 50%;
-                        z-index: 1;
-                    }
+        <form method="POST" action="{{ '/public_finish' if is_public else '/likert/post/' ~ lesson.id }}">
+            <input type="hidden" name="id" value="{{ lesson.id }}">
+            
+            <div class="mb-8">
+                {% include 'includes/likert_scale.html' %}
+            </div>
 
-                    .scale-marker {
-                        position: absolute;
-                        top: 0;
-                        width: 2px;
-                        background-color: rgb(0, 0, 0);
-                        z-index: 2;
-                    }
+            {% if not is_public %}
+                <div class="divider font-black text-[10px] uppercase tracking-[0.3em] text-gray-300 my-16">Research Verification</div>
+                <div class="flex flex-col items-center">
+                    <iframe id="google-form" class="w-full max-w-3xl rounded-2xl border border-gray-100 shadow-xl mb-6"
+                        src="https://docs.google.com/forms/d/e/1FAIpQLSf19sqPU43em5bPRjqboFxMCk-_XA0ZfPqZ7a5Dx6MNZRpjTw/viewform?usp=pp_url&entry.1231914852={{ session['user.email'] }}&entry.24407953={{ lesson.id }}&embedded=true"
+                        height="600" frameborder="0">Loading…</iframe>
 
-                    .marker-label {
-                        font-size: 0.75rem;
-                        text-align: center;
-                    }
-
-                    /* Define different heights for the markers */
-                    .scale-marker:nth-child(1),
-                    .scale-marker:nth-child(4),
-                    .scale-marker:nth-child(7),
-                    .scale-marker:nth-child(10),
-                    .scale-marker:nth-child(13),
-                    .scale-marker:nth-child(16) {
-                        height: 40px;
-                        /* Longer markers */
-                        width: 3px;
-                    }
-
-                    .scale-marker:not(:nth-child(1)):not(:nth-child(4)):not(:nth-child(7)):not(:nth-child(10)):not(:nth-child(13)):not(:nth-child(16)) {
-                        height: 20px;
-                        /* Regular markers */
-                    }
-                </style>
-                <input type="range"
-                    style="border: none; box-shadow: none; margin-left: 20px; width: 94%; margin-bottom: -15px;"
-                    class="form-range" id="belief-scale" name="likert_scale" min="1" max="15" step="1" required>
-                <div class="scale-container">
-                    <div class="scale-markers">
-                        <!-- Create one scale marker for each position from 0 to 14 to show snap points -->
-                        <div class="scale-marker" style="left: 0%;"></div>
-                        <div class="scale-marker" style="left: 6.67%;"></div>
-                        <div class="scale-marker" style="left: 13.33%;"></div>
-                        <div class="scale-marker" style="left: 20%;"></div>
-                        <div class="scale-marker" style="left: 26.67%;"></div>
-                        <div class="scale-marker" style="left: 33.33%;"></div>
-                        <div class="scale-marker" style="left: 40%;"></div>
-                        <div class="scale-marker" style="left: 46.67%;"></div>
-                        <div class="scale-marker" style="left: 53.33%;"></div>
-                        <div class="scale-marker" style="left: 60%;"></div>
-                        <div class="scale-marker" style="left: 66.67%;"></div>
-                        <div class="scale-marker" style="left: 73.33%;"></div>
-                        <div class="scale-marker" style="left: 80%;"></div>
-                        <div class="scale-marker" style="left: 86.67%;"></div>
-                        <div class="scale-marker" style="left: 93.33%;"></div>
-                        <div class="scale-marker" style="left: 100%;"></div>
+                    <div class="task-banner bg-primary border-0 p-5 rounded-3xl mb-8 flex flex-col items-center gap-4 w-full max-w-3xl shadow-lg">
+                        <p class="text-sm font-bold text-white text-center">Enter your Completion Code from the form below to finish.</p>
+                        <input type="text" id="completionCode" class="input input-bordered w-full max-w-xs bg-white/10 text-white text-center font-black tracking-widest focus:bg-white focus:text-gray-900 border-white/20" placeholder="XXXXXX">
                     </div>
                 </div>
-                <div class="d-flex justify-content-between mt-5" style="margin-left: 35px; margin-right: 35px;">
-                    <span class="marker-label">Definitely<br> FALSE</span>
-                    <span class="marker-label">Probably<br> FALSE</span>
-                    <span class="marker-label">Uncertain</span>
-                    <span class="marker-label">Probably<br> TRUE</span>
-                    <span class="marker-label">Definitely <br>TRUE</span>
+
+                <script>
+                    document.getElementById('completionCode').addEventListener('input', function () {
+                        const code = this.value.trim();
+                        const button = document.getElementById('complete-btn');
+                        button.disabled = (code !== 'GOODJOB2025');
+                    });
+                </script>
+            {% else %}
+                <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 mb-6 shadow-inner">
+                    <label for="public-feedback" class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Any feedback? (Optional)</label>
+                    <textarea class="textarea textarea-bordered w-full h-20 rounded-lg p-3 text-xs font-medium focus:border-primary transition-all bg-white" id="public-feedback" name="feedback" placeholder="Your thoughts..."></textarea>
                 </div>
+            {% endif %}
+
+            <div class="text-center pb-12 reveal">
+                <button id="complete-btn" type="submit" class="btn btn-primary btn-sm rounded-full px-10 shadow-md hover:shadow-lg transition-all text-white font-bold uppercase tracking-widest text-[10px] disabled:opacity-30" {% if not is_public %}disabled{% endif %}>
+                    {{ 'Finish Lesson' if is_public else 'Complete Academic Lesson' }}
+                </button>
             </div>
-            <!-- <div class="alert alert-primary mt-5 mb-3" role="alert">
-               <b>Important!
-                    </b> Before completing this lesson, remember to fill the <a href="https://docs.google.com/forms/d/e/1FAIpQLSf19sqPU43em5bPRjqboFxMCk-_XA0ZfPqZ7a5Dx6MNZRpjTw/viewform?usp=preview"
-                        target="_blank"> IMI Questionnaire</a>.
-                
-            </div> -->
-
-            <h4 class="mt-5"> Please fill out the form below.</h4>
-            <iframe id="google-form" class="mt-2 mb-3"
-                src="https://docs.google.com/forms/d/e/1FAIpQLSf19sqPU43em5bPRjqboFxMCk-_XA0ZfPqZ7a5Dx6MNZRpjTw/viewform?usp=pp_url&entry.1231914852={{ session['user.email'] }}&entry.24407953={{ lesson.id }}&embedded=true"
-                width="640" height="1200" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
-
-
-
-
-            <div class="alert alert-primary mt-3" role="alert">
-                <strong class="me-3">Task</strong>You must fill out and submit the form above. When you have submitted it, a Lesson Completion Code will be shown to you, that you have to enter below to continue.
-            </div>
-
-            <div class="form-group mt-4 text-center">
-                <label for="completionCode">Form Completion Code</label>
-                <input type="text" id="completionCode" class="form-control text-center"
-                    placeholder="Enter code to unlock Complete button">
-            </div>
-
-            <script>
-                document.getElementById('completionCode').addEventListener('input', function () {
-                    const code = this.value.trim();
-                    const button = document.getElementById('complete-btn');
-                    button.disabled = (code !== 'GOODJOB2025');
-                });
-            </script>
-
-            <div class="text-center">
-                <button id="complete-btn" type="submit" class="btn btn-primary mt-3" disabled>Complete lesson</button>
-            </div>
-
-
         </form>
         {% endif %}
     </div>
-    </div>
-    </div>
-
+    </main>
 
     {% include 'includes/footer.html' %}
 
@@ -787,7 +515,6 @@
 <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 
 <script>
-    // Function to send the message
     function sendMessage() {
         const inputField = document.getElementById('exampleFormControlInput1');
         const sendButton = document.getElementById('sendButton');
@@ -799,80 +526,66 @@
         }
 
         if (message) {
-            // Immediately add the user's message as a blue bubble
             const userBubble = `
-                <div class="d-flex flex-row justify-content-end mb-4 pt-1">
-                    <div>
-                        <p style="max-width: 400px; cursor: pointer;" 
-                                    class="small p-2 me-3 mb-1 text-white rounded-4 bg-primary"
-                                    data-bs-toggle="popover" 
-                                    tabindex="0"
-                                    data-bs-html="true" 
-                                    data-bs-trigger="focus"
-                                    title="Message Actions" 
-                                    data-bs-content="<a  class='btn btn-sm btn-primary me-2'>Feedback</a><a  class='btn btn-sm btn-danger me-2'>Redact</a>">
-                                    ${message}
-                                </p>
+                <div class="chat chat-end animate-in slide-in-from-right-2 duration-300">
+                    <div class="chat-image avatar">
+                        <div class="w-6 rounded-lg bg-blue-50">
+                            <img alt="User" src="/static/img/chat-user.png" />
+                        </div>
                     </div>
-                    <img src="static/img/chat-user.png" alt="avatar 1" style="width: 45px; height: 100%;">
+                    <div class="chat-header text-[8px] font-black uppercase tracking-widest opacity-25 mb-0.5 text-gray-900">You</div>
+                    <div class="chat-bubble chat-bubble-primary rounded-xl text-xs font-medium leading-tight py-2 px-3 shadow-none min-h-0">
+                        ${message}
+                    </div>
                 </div>
             `;
             chatBody.innerHTML += userBubble;
-            chatBody.scrollTop = chatBody.scrollHeight; // Scroll to bottom
-            inputField.value = ''; // Clear input field
+            chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: 'smooth' });
+            inputField.value = '';
 
-            // Replace the send button with a loading spinner
             const originalButtonHTML = sendButton.innerHTML;
-            sendButton.innerHTML = `<div class="spinner-border spinner-border-sm" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>`;
-            sendButton.disabled = true; // Disable the button
+            sendButton.innerHTML = `<span class="loading loading-spinner loading-xs text-white"></span>`;
+            sendButton.disabled = true;
 
-            // Send message to Flask server via Fetch API
             fetch('/send_message', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ conv_id: "{{ lesson.id }}", content: message })
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Add bot's reply to the conversation
-                        const botBubble = `
-                        <div class="d-flex flex-row justify-content-start mb-4">
-                            <img src="static/img/chat-forty.png" alt="avatar 1" style="width: 45px; height: 100%;">
-                            <div>
-                                <p style="max-width: 400px;" class="small p-2 ms-3 mb-1 rounded-4 bg-body-tertiary">${data.bot_reply}</p>
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const botBubble = `
+                        <div class="chat chat-start animate-in slide-in-from-left-2 duration-300">
+                            <div class="chat-image avatar">
+                                <div class="w-6 rounded-lg shadow-sm border border-gray-100">
+                                    <img alt="Forty" src="/static/img/chat-forty.png" />
+                                </div>
+                            </div>
+                            <div class="chat-header text-[8px] font-black uppercase tracking-widest text-primary opacity-60 mb-0.5">Forty</div>
+                            <div class="chat-bubble bg-gray-100 border-0 text-gray-800 rounded-xl text-xs font-medium leading-tight py-2 px-3 shadow-none min-h-0">
+                                ${data.bot_reply}
                             </div>
                         </div>
                     `;
-                        chatBody.innerHTML += botBubble;
-                        chatBody.scrollTop = chatBody.scrollHeight; // Scroll to bottom
-                    } else {
-                        alert('Message failed to send: ' + data.error);
-                    }
-                })
-                .catch(error => console.error('Error:', error))
-                .finally(() => {
-                    // Restore the send button and re-enable it
-                    sendButton.innerHTML = originalButtonHTML;
-                    sendButton.disabled = false;
-
-                    <!-- TODO: update message IDs and everything without refreshing the page -->
-                    location.reload()
-                });
+                    chatBody.innerHTML += botBubble;
+                    chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: 'smooth' });
+                } else {
+                    alert('Message failed: ' + data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error))
+            .finally(() => {
+                sendButton.innerHTML = originalButtonHTML;
+                sendButton.disabled = false;
+            });
         }
     }
 
-    // Send message on button click
     document.getElementById('sendButton').addEventListener('click', sendMessage);
-
-    // Send message on Enter key press
     document.getElementById('exampleFormControlInput1').addEventListener('keydown', function (event) {
         if (event.key === 'Enter') {
-            event.preventDefault(); // Prevent form submission (if any)
+            event.preventDefault();
             sendMessage();
         }
     });
@@ -880,51 +593,13 @@
     document.addEventListener('DOMContentLoaded', function () {
         var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
         popoverTriggerList.forEach(function (popoverTriggerEl) {
-            new bootstrap.Popover(popoverTriggerEl, {
-                trigger: 'focus'
-            })
-
+            new bootstrap.Popover(popoverTriggerEl, { trigger: 'focus' });
         });
     });
-
-    function redactMessage(messageId) {
-        console.log("Redact message with ID:", messageId);
-        // Add your redaction logic here
-    }
-
-    function giveFeedback(messageId) {
-        console.log("Give feedback on message with ID:", messageId);
-        // Add your feedback logic here
-    }
-
 </script>
 
 <style>
-    .progress-dot {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        background-color: grey;
-        color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding-bottom: 3px;
-    }
-
-    .progress-dot.active {
-        background-color: #4572C4;
-    }
-
-    .progress-line {
-        width: 50px;
-        height: 5px;
-        background-color: grey;
-    }
-
-    .progress-line.active {
-        background-color: #4572C4;
-    }
+    .steps .step:before { height: 0.5rem !important; }
 </style>
 
 </html>

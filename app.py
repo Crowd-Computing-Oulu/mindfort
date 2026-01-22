@@ -73,7 +73,8 @@ def init_db():
                 ip TEXT NOT NULL,
                 lessons_order TEXT NOT NULL,
                 email TEXT UNIQUE,
-                password TEXT NOT NULL
+                password TEXT NOT NULL,
+                notify_content BOOLEAN DEFAULT 0
             )
             """)
         
@@ -172,19 +173,13 @@ def get_db_connection():
     return conn
 
 @app.route('/')
-def index():
-    lessons_ordered_for_user = {}
-    
-    
-    if session.get('user.lessons_order'):
-        for i in range (0, len(lessons)):
-            lessons_ordered_for_user[i] = get_lesson_by_id_with_ordering(i, session['user.lessons_order'])
-    
-    return render_template('index.html', 
-        lessons = lessons_ordered_for_user,
-        session_id = get_session_id(),
+def index_public():
+    # Public landing page (MindFort.com style)
+    session['is_public'] = True
+    return render_template('index_public.html', 
         version = VERSION,
         current_path=request.path)
+
     
 @app.route('/admin')
 def admin():
@@ -304,6 +299,7 @@ def signup():
         password = request.form['signup-password']
         confirm_password = request.form['signup-password-confirm']
         terms = request.form.get('terms')
+        notify_content = 1 if request.form.get('signup-notify') else 0
 
         if not terms:
             flash('You must accept the terms and conditions.', 'danger')
@@ -332,9 +328,9 @@ def signup():
         try:
             conn = get_db_connection()
             conn.execute("""
-                INSERT INTO users (first_name, last_name, username, age, gender, country, email, password, level, lesson_state, signup_datetime, ip, lessons_order, lesson_cases)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                         (first_name, last_name, username, age, gender, country, email, hashed_password, 0, 0, signup_datetime, user_ip, lesson_order_str, lesson_cases_str))
+                INSERT INTO users (first_name, last_name, username, age, gender, country, email, password, level, lesson_state, signup_datetime, ip, lessons_order, lesson_cases, notify_content)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                         (first_name, last_name, username, age, gender, country, email, hashed_password, 0, 0, signup_datetime, user_ip, lesson_order_str, lesson_cases_str, notify_content))
             conn.commit()
             conn.close()
             
@@ -409,13 +405,87 @@ def signin():
       current_path=request.path)
 
 
+def ensure_guest_session(is_public=True):
+    """Ensure a guest user exists in the session and database."""
+    if 'user.id' not in session:
+        # Create a guest user entry
+        guest_id = str(uuid.uuid4())[:8]
+        if is_public:
+            username = f"guest_{guest_id}"
+            first_name = "Guest"
+        else:
+            username = f"researcher_guest_{guest_id}"
+            first_name = "Researcher Guest"
+            
+        signup_datetime = datetime.utcnow()
+        user_ip = request.remote_addr
+
+        # Default lesson order (0,1,2,3)
+        lesson_order_str = "0,1,2,3"
+        
+        # Default cases: Public mode uses 3 (Chat only), Researcher mode uses 3 for now but original logic might apply
+        # The user wants "exact original" for researcher, which implies cases might be dynamic.
+        # However, for an auto-guest, we need to assign something. Let's use 3 for both but researcher has full states.
+        lesson_cases_str = "3,3,3,3"
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO users (first_name, last_name, username, email, password, level, lesson_state, signup_datetime, ip, lessons_order, lesson_cases)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (first_name, "", username, f"{username}@guest.local", "", 0, 0, signup_datetime, user_ip, lesson_order_str, lesson_cases_str))
+        user_id = cur.lastrowid
+        conn.commit()
+        conn.close()
+
+        session['user.id'] = user_id
+        session['user.username'] = username
+        session['user.first_name'] = first_name
+        session['user.level'] = 0
+        session['user.lesson_state'] = 0
+        session['user.lessons_order'] = lesson_order_str
+        session['user.lesson_cases'] = ["3", "3", "3", "3"]
+        session['is_public'] = is_public
+
+@app.route('/study')
+def index_study():
+    # Ensure guest session if not logged in
+    if 'user.id' not in session:
+        ensure_guest_session(is_public=False)
+        
+    # Original research study landing page
+    lessons_ordered_for_user = {}
+    
+    if session.get('user.lessons_order'):
+        for i in range (0, len(lessons)):
+            lessons_ordered_for_user[i] = get_lesson_by_id_with_ordering(i, session['user.lessons_order'])
+    
+    return render_template('researcher/index.html', 
+        lessons = lessons_ordered_for_user,
+        session_id = get_session_id(),
+        version = VERSION,
+        current_path=request.path)
+
 @app.route('/lesson', methods=['GET'])
 def lesson():
     try:
-        id = int(request.args.get("id"))  # Use 'id' as lesson_id
+        id_param = request.args.get("id")
+        if id_param is None:
+             return redirect(url_for('index_public'))
+        
+        id = int(id_param)
+        
+        # In public mode, we auto-signin as guest if not logged in
+        if 'user.id' not in session:
+            ensure_guest_session()
+            
         user_id = session.get('user.id') 
         # Fetch messages for the conversation
         messages = get_messages_from_db(user_id,id)
+        
+        # Determine if we should use the simplified public flow
+        is_public = session.get('is_public', False)
+        
         return render_template(
             'lesson.html',
             lesson=get_lesson_by_id_with_ordering(id, session['user.lessons_order']),
@@ -423,9 +493,11 @@ def lesson():
             lesson_state=session['user.lesson_state'],
             version=VERSION,
             current_path=request.path,
-            messages=messages
+            messages=messages,
+            is_public=is_public
         )
     except Exception as e:
+        app.logger.error(f"Error in lesson route: {e}")
         return jsonify({"error": str(e)}), 500
 
 
@@ -475,12 +547,13 @@ def likert(version,lesson_id):
                     (user_id,)
                 )
                 # Update the session to reflect the new lesson_state
-                user_level = conn.execute(
+                user_level_row = conn.execute(
                     "SELECT lesson_state FROM users WHERE id = ?",
                     (user_id,)
                 ).fetchone()
-                session['user.lesson_state'] = user_level[0] if user_level else session.get('lesson_state', 0)
+                session['user.lesson_state'] = user_level_row[0] if user_level_row else session.get('lesson_state', 0)
         except Exception as e:
+            app.logger.error(f'An error occurred in likert update: {e}')
             flash(f'An error occurred: {e}', 'error')
         finally:
             conn.close()
@@ -494,38 +567,42 @@ def likert(version,lesson_id):
                     (user_id,)
                 )
                 # Update the session to reflect the new level
-                user_level = conn.execute(
+                user_level_row = conn.execute(
                     "SELECT level FROM users WHERE id = ?",
                     (user_id,)
                 ).fetchone()
-                session['user.level'] = user_level[0] if user_level else session.get('level', 0)
-
-            
+                session['user.level'] = user_level_row[0] if user_level_row else session.get('level', 0)
         except Exception as e:
+            app.logger.error(f'An error occurred in level increment: {e}')
             flash(f'An error occurred: {e}', 'error')
         finally:
             conn.close()
 
         flash('Lesson finished, level UP', 'success')
-        return redirect(url_for('index'))
+        return redirect(url_for('index_study'))
     else:
         try:
             conn = get_db_connection()
             with conn:
                 # Increment the user's lesson_state in the database
+                # If in public mode, skip states 2 (Likert Mid) and 3 (Reading)
+                next_state_increment = 1
+                if session.get('is_public') and session.get('user.lesson_state') == 1:
+                    next_state_increment = 3 # Jump from 1 to 4
+                
                 conn.execute(
-                    "UPDATE users SET lesson_state = lesson_state + 1 WHERE id = ?",
-                    (user_id,)
+                    "UPDATE users SET lesson_state = lesson_state + ? WHERE id = ?",
+                    (next_state_increment, user_id)
                 )
                 # Update the session to reflect the new lesson_state
-                user_level = conn.execute(
+                user_level_row = conn.execute(
                     "SELECT lesson_state FROM users WHERE id = ?",
                     (user_id,)
                 ).fetchone()
-                session['user.lesson_state'] = user_level[0] if user_level else session.get('lesson_state', 0)
-            session['user.lesson_state'] == 4
+                session['user.lesson_state'] = user_level_row[0] if user_level_row else session.get('lesson_state', 0)
             flash('Stage finished. On to the next lesson stage.', 'success')
         except Exception as e:
+            app.logger.error(f'An error occurred in lesson_state increment: {e}')
             flash(f'An error occurred: {e}', 'error')
         finally:
             conn.close()
@@ -551,7 +628,7 @@ def get_messages_from_db(user_id, lesson_id):
         4. After they disprove it, introduce the next argument.
         5. After the last argument, say goodbye and ask them to press “Continue.”
 
-        You're arguing *against* the correct belief that  "{get_lesson_by_id_with_ordering(lesson_id, session['user.lessons_order'])['truth']}".
+        You're arguing *against* the correct belief that "{get_lesson_by_id_with_ordering(lesson_id, session['user.lessons_order'])['truth']}".
 
         Present the following misleading arguments in order:
         {
@@ -1038,6 +1115,36 @@ def get_session_id():
     session_id = session['session_id']
 
     return session_id
+
+@app.route('/public_finish', methods=['POST'])
+def public_finish():
+    if not session.get('is_public'):
+        return redirect(url_for('index_study'))
+    
+    user_id = session.get('user.id')
+    lesson_id = int(request.form.get('id', 0)) # Need to pass this in form
+    value = request.form.get('likert_scale')
+    feedback_text = request.form.get('feedback')
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    conn = get_db_connection()
+    # Save post-likert
+    conn.execute("""
+        INSERT INTO likert_post (user_id, lesson_id, value, created_at)
+        VALUES (?, ?, ?, ?)
+    """, (user_id, lesson_id, value, timestamp))
+    
+    # Save general feedback
+    if feedback_text:
+        conn.execute("INSERT INTO feedback (user_id, content) VALUES (?, ?)", (user_id, feedback_text))
+    
+    conn.commit()
+    conn.close()
+    
+    # Reset session for next time but keep user if we want
+    session.clear()
+    flash('Thank you for chatting with Forty!', 'success')
+    return redirect(url_for('index_public'))
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)

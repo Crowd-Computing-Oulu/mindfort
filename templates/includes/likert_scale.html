@@ -1,0 +1,91 @@
+<div class="mt-5">
+    <style>
+        .scale-container {
+            position: relative;
+            width: 98%;
+            margin-top: 20px;
+            margin-left: 5px;
+        }
+
+        .scale-markers {
+            position: absolute;
+            width: 100%;
+            top: -10px;
+            left: 0;
+            height: 20px;
+        }
+
+        .scale-markers::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            border-top: 2px solid #000;
+            top: 50%;
+            z-index: 1;
+        }
+
+        .scale-marker {
+            position: absolute;
+            top: 0;
+            width: 2px;
+            background-color: rgb(0, 0, 0);
+            z-index: 2;
+        }
+
+        .marker-label {
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        /* Define different heights for the markers */
+        .scale-marker:nth-child(1),
+        .scale-marker:nth-child(4),
+        .scale-marker:nth-child(7),
+        .scale-marker:nth-child(10),
+        .scale-marker:nth-child(13),
+        .scale-marker:nth-child(16) {
+            height: 40px;
+            /* Longer markers */
+            width: 3px;
+        }
+
+        .scale-marker:not(:nth-child(1)):not(:nth-child(4)):not(:nth-child(7)):not(:nth-child(10)):not(:nth-child(13)):not(:nth-child(16)) {
+            height: 20px;
+            /* Regular markers */
+        }
+    </style>
+    <input type="range"
+        style="border: none; box-shadow: none; margin-left: 20px; width: 94%; margin-bottom: -15px;"
+        class="form-range" id="belief-scale-{{ lesson_state }}" name="likert_scale" min="1" max="15" step="1" required>
+    <div class="scale-container">
+        <div class="scale-markers">
+            <!-- Create one scale marker for each position from 0 to 14 to show snap points -->
+            <div class="scale-marker" style="left: 0%;"></div>
+            <div class="scale-marker" style="left: 6.67%;"></div>
+            <div class="scale-marker" style="left: 13.33%;"></div>
+            <div class="scale-marker" style="left: 20%;"></div>
+            <div class="scale-marker" style="left: 26.67%;"></div>
+            <div class="scale-marker" style="left: 33.33%;"></div>
+            <div class="scale-marker" style="left: 40%;"></div>
+            <div class="scale-marker" style="left: 46.67%;"></div>
+            <div class="scale-marker" style="left: 53.33%;"></div>
+            <div class="scale-marker" style="left: 60%;"></div>
+            <div class="scale-marker" style="left: 66.67%;"></div>
+            <div class="scale-marker" style="left: 73.33%;"></div>
+            <div class="scale-marker" style="left: 80%;"></div>
+            <div class="scale-marker" style="left: 86.67%;"></div>
+            <div class="scale-marker" style="left: 93.33%;"></div>
+            <div class="scale-marker" style="left: 100%;"></div>
+        </div>
+    </div>
+
+    
+    <div class="d-flex justify-content-between mt-5" style="margin-left: 35px; margin-right: 35px;">
+        <span class="marker-label">Definitely<br> FALSE</span>
+        <span class="marker-label">Probably<br> FALSE</span>
+        <span class="marker-label">Uncertain</span>
+        <span class="marker-label">Probably<br> TRUE</span>
+        <span class="marker-label">Definitely <br>TRUE</span>
+    </div>
+</div>

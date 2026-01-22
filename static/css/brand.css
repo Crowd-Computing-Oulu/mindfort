@@ -1,0 +1,103 @@
+:root {
+    --primary: #0d6efd;
+    --primary-light: rgba(13, 110, 253, 0.05);
+    --primary-border: rgba(13, 110, 253, 0.1);
+    --radius-lg: 1rem;
+    --radius-md: 0.75rem;
+}
+
+.max-row {
+    max-width: 1000px;
+}
+
+/* Reveal Animations */
+.reveal {
+    opacity: 0;
+    transform: translateY(15px);
+    transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal-active {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+.delay-1 {
+    transition-delay: 100ms;
+}
+
+.delay-2 {
+    transition-delay: 200ms;
+}
+
+.delay-3 {
+    transition-delay: 300ms;
+}
+
+/* Branding Overrides */
+.btn-primary {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: white !important;
+    font-weight: 700 !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-primary:not(.rounded-full) {
+    border-radius: var(--radius-md) !important;
+}
+
+.btn-primary:hover {
+    opacity: 0.95;
+    background-color: #0c61e0 !important;
+    transform: translateY(-1px);
+}
+
+.text-primary {
+    color: #0d6efd !important;
+}
+
+.bg-primary {
+    background-color: #0d6efd !important;
+}
+
+.border-primary {
+    border-color: #0d6efd !important;
+}
+
+/* Card alignment with index */
+.card-theme {
+    background-color: white;
+    border: 1px solid #f3f4f6;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.card-theme:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Typography alignment */
+.brand-h1 {
+    font-size: 1.75rem;
+    line-height: 2.15rem;
+    font-weight: 900;
+    color: var(--primary);
+    letter-spacing: -0.025em;
+}
+
+@media (min-width: 768px) {
+    .brand-h1 {
+        font-size: 2rem;
+        line-height: 2.35rem;
+    }
+}
+
+/* Smooth image rendering */
+img {
+    image-rendering: auto;
+    image-rendering: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}

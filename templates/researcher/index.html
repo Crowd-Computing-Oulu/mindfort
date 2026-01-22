@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-{% include 'includes/head.html' %}
+{% include 'researcher/includes/head.html' %}
 <script>
     // Helper functions to get and set cookies
     function setCookie(name, value, minutes) {
@@ -67,9 +67,9 @@
 
 <body class="d-flex flex-column min-vh-100">
 
-    {% include 'includes/navbar.html' %}
+    {% include 'researcher/includes/navbar.html' %}
 
-    {% include 'includes/messages.html' %}
+    {% include 'researcher/includes/messages.html' %}
 
     <div class="container-lg " style="min-height: 600px;">
         {% if session['user.id'] is defined %}
@@ -106,14 +106,6 @@
         </div>
         {% endif %}
 
-        {% if session.get('user.username') and session['user.username'].startswith('researcher_guest_') %}
-        <div class="text-center mb-4">
-            <small class="text-muted" style="font-size: 0.65rem; opacity: 0.6; display: block; margin-top: -15px;">
-                MindFort Researcher View: This is a specialized version of the platform used for academic experiments and rigorous testing of inoculation theory. It utilizes the full 5-stage educational flow.
-            </small>
-        </div>
-        {% endif %}
-
         <div class="text-center mb-4">
             Level <b class="text-primary" style="font-size: 2rem;">{{session['user.level'] + 1}}</b>
         </div>
@@ -143,7 +135,7 @@
                     {% for lesson_id, lesson_data in lessons.items() %}
                     <div class="col-3">
                         <div class="text-center">
-                            <img src="static/img/{{lesson_data['topic']}}.png" height="80px" class="mt-3 mb-3">
+                            <img src="{{ url_for('static', filename='researcher/img/' + lesson_data['topic'] + '.png') }}" height="80px" class="mt-3 mb-3">
                         </div>
                         <div>
                             <div class="p-2">
@@ -188,7 +180,7 @@
 
 
         <div class="m-5 text-center">
-            <img src="{{ url_for('static', filename='img/forty.png') }}" height="128px">
+            <img src="{{ url_for('static', filename='researcher/img/forty.png') }}" height="128px">
         </div>
         {% else %}
         <!-- Non-Signed-in User Content -->
@@ -196,12 +188,12 @@
 
         <!-- Topics Grid -->
         <div class="container mt-1">
-            <h1 class="mb-4 text-center">Welcome to MindFort!</h1>
+            <h1 class="mb-4 text-center">Welcome to MeetForty!</h1>
 
             <div class="row align-items-center">
                 <div class="col-12 col-md-8 mb-4">
                     <p class="lead">
-                        MindFort is designed to help you recognize and counter misinformation across a wide range of
+                        MeetForty is designed to help you recognize and counter misinformation across a wide range of
                         topics.
                         Strengthen your critical thinking, and expand your knowledge through engaging lessons and
                         discussions.
@@ -217,11 +209,13 @@
                 </div>
 
                 <div class="col-12 col-md-4 text-center mb-4">
-                    <img src="{{ url_for('static', filename='img/chat-forty.png') }}" class="img-fluid mb-3"
+                    <img src="{{ url_for('static', filename='img/forty.png') }}" class="img-fluid mb-3"
                         style="max-height: 200px;" alt="Forty">
                     <br>
                     <a href="/signup" class="btn btn-primary btn-lg">Get Started</a> <br>
-                    <a href="/signin" class="btn btn-outline-primary btn-sm mt-2">Already have an account? Sign In</a>
+                    <!-- <a class="btn btn-secondary mt-3 mb-3" href="/chiguestsignin">
+                        CHI 2025 Guest Signin →
+                    </a> -->
                 </div>
             </div>
 
@@ -230,7 +224,7 @@
                 <!-- Medicine Topic -->
                 <div class="col-md-3 mb-4">
                     <div class="list-group">
-                        <img src="{{ url_for('static', filename='img/medicine.png') }}"
+                        <img src="{{ url_for('static', filename='researcher/img/medicine.png') }}"
                             class="img-fluid mb-3 d-block mx-auto" alt="Medicine"
                             style="max-height: 100px; height: auto;">
                         <h5 class="">Medicine</h5>
@@ -242,7 +236,7 @@
                 <!-- Nature Topic -->
                 <div class="col-md-3 mb-4">
                     <div class="list-group">
-                        <img src="{{ url_for('static', filename='img/nature.png') }}"
+                        <img src="{{ url_for('static', filename='researcher/img/nature.png') }}"
                             class="img-fluid mb-3 d-block mx-auto" alt="Nature"
                             style="max-height: 100px; height: auto;">
                         <h5 class="">Nature</h5>
@@ -254,7 +248,7 @@
                 <!-- Self-Care Topic -->
                 <div class="col-md-3 mb-4">
                     <div class="list-group">
-                        <img src="{{ url_for('static', filename='img/selfcare.png') }}"
+                        <img src="{{ url_for('static', filename='researcher/img/selfcare.png') }}"
                             class="img-fluid mb-3 d-block mx-auto" alt="Self-Care"
                             style="max-height: 100px; height: auto;">
                         <h5 class="">Self-Care</h5>
@@ -266,7 +260,7 @@
                 <!-- Technology Topic -->
                 <div class="col-md-3 mb-4">
                     <div class="list-group">
-                        <img src="{{ url_for('static', filename='img/technology.png') }}"
+                        <img src="{{ url_for('static', filename='researcher/img/technology.png') }}"
                             class="img-fluid mb-3 d-block mx-auto" alt="Technology"
                             style="max-height: 100px; height: auto;">
                         <h5 class="">Technology</h5>
@@ -282,10 +276,49 @@
                 <div class="row">
                     <div class="col-6 align-content-center">
                         <p>
-                            ANONYMIZED
+                            MindFort is part of an experiment conducted by researchers at University of Oulu and The
+                            University of Tokyo. <br> Read more about our mission <a href="about">here</a>.
                         </p>
                     </div>
-                    ANONYMIZED
+                    <div class="col-3"> <img style="max-height: 120px; height: auto;"
+                            src="{{ url_for('static', filename='researcher/img/uoulu.jpg') }}">
+                    </div>
+                    <div class="col-3"> <img style="max-height: 120px; height: auto;"
+                            src="{{ url_for('static', filename='researcher/img/utokyo.png') }}"></div>
+                </div>
+                
+                <!-- Scientific Publication -->
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="fw-bold mb-4">Scientific Publication</h4>
+                    <div class="card bg-light border-0 rounded-4 p-4 text-start">
+                        <div class="row align-items-center">
+                            <div class="col-md-3 text-center mb-3 mb-md-0">
+                                <a href="/static/MindFort.pdf" target="_blank" class="btn btn-outline-primary rounded-pill">
+                                    <img src="{{ url_for('static', filename='img/chat-forty.png') }}" class="rounded-pill me-2" width="24" style="filter: grayscale(1); opacity: 0.5;">
+                                    Download PDF
+                                </a>
+                            </div>
+                            <div class="col-md-9">
+                                <p class="mb-1 fw-bold">MindFort: Strengthening Logical Thinking and Misinformation Resilience through AI-Guided Conversational Debates</p>
+                                <p class="small text-muted mb-2">DOI: <a href="https://doi.org/10.1145/3772318.3790954" target="_blank">10.1145/3772318.3790954</a></p>
+                                <p class="small mb-3">
+                                    <a href="https://crowd-computing-oulu.github.io/cognitive-inoculation-paper-page/" target="_blank" class="text-primary text-decoration-none">
+                                        Read more about the research &rarr;
+                                    </a>
+                                </p>
+                                
+                                <label class="small fw-bold text-uppercase text-muted d-block mb-1" style="font-size: 0.65rem;">BibTeX Citation</label>
+                                <pre class="bg-dark text-light p-3 rounded-3 small mb-0" style="font-size: 0.7rem; line-height: 1.4; overflow-x: auto;">@inproceedings{mindfort2026,
+  author = {Szabo, D. and others},
+  title = {MindFort: Strengthening Logical Thinking and Misinformation Resilience through AI-Guided Conversational Debates},
+  year = {2026},
+  publisher = {ACM},
+  doi = {10.1145/3772318.3790954},
+  booktitle = {Proceedings of the CHI Conference on Human Factors in Computing Systems (CHI '26)}
+}</pre>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -295,36 +328,13 @@
 
 
     {% endif %}
-
-    <!-- Partners & Funding Section -->
-    <div class="mt-5 pt-5 border-top pb-5">
-        <div class="row align-items-center justify-content-center text-center">
-            <div class="col-lg-10">
-                <p class="text-uppercase small fw-bold text-muted mb-4 opacity-75" style="letter-spacing: 0.1em;">Institutional Partners</p>
-                <div class="d-flex flex-wrap justify-content-center align-items-center gap-5 mb-4 grayscale" style="opacity: 0.6;">
-                    <img src="{{ url_for('static', filename='img/oulu_logo.png') }}" alt="University of Oulu" class="img-fluid" style="height: 35px;">
-                    <img src="{{ url_for('static', filename='img/utokyo_logo.png') }}" alt="The University of Tokyo" class="img-fluid" style="height: 35px;">
-                </div>
-                <p class="small text-muted font-bold mb-1 uppercase tracking-wider" style="font-size: 0.75rem;">
-                    University of Oulu &bull; The University of Tokyo
-                </p>
-                <p class="small text-muted italic mb-4" style="font-size: 0.7rem;">
-                    Created at the University of Oulu in collaboration with The University of Tokyo
-                </p>
-                <p class="text-muted mx-auto" style="font-size: 0.65rem; line-height: 1.5; opacity: 0.7; max-width: 800px;">
-                    This research is partly funded by the Strategic Research Council (SRC), established within the Research Council of Finland (Grants 356128, 335625, 335729), and Research Fellowship funding by the Research Council of Finland (Grants 356128, 349637 and 353790). The research was also partly supported by JSPS Bilateral Collaboration between Japan and Finland (Grant Number: JPJSBP120232701). This work was partly supported by JST ASPIRE for Top Scientists (Grant Number JPMJAP2405).
-                </p>
-            </div>
-        </div>
     </div>
-
-    </div>
-    {% include 'includes/footer.html' %}
+    {% include 'researcher/includes/footer.html' %}
 
 
 
 </body>
 
-<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+<script src="{{ url_for('static', filename='researcher/js/scripts.js') }}"></script>
 
 </html>

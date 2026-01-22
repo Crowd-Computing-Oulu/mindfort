@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+{% include 'includes/head.html' %}
+
+<body class="min-vh-100 flex flex-col bg-white font-sans">
+
+    {% include 'includes/navbar.html' %}
+
+    <!-- Main Content -->
+    <main class="flex-grow pt-10 pb-8 px-4 md:px-6">
+        <div class="max-row mx-auto">
+            
+            <!-- Hero Section: Compact -->
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-6 mb-8 reveal">
+                <div class="lg:w-3/5 text-center lg:text-left">
+                    <div class="inline-block p-1 bg-blue-50 rounded-lg mb-2">
+                        <span class="text-primary font-bold px-2 py-0.5 text-[10px] tracking-wider uppercase">Introducing MindFort</span>
+                    </div>
+                    <h1 class="text-2xl md:text-3xl font-black mb-2 leading-tight !text-primary">
+                        Hi, I'm Forty!
+                    </h1>
+                    <p class="text-sm text-gray-500 mb-0 max-w-lg mx-auto lg:mx-0 leading-relaxed">
+                        I'm your AI guide in the <strong class="text-gray-900">MindFort</strong> system. We'll engage in conversational debates help you stay resilient against misinformation.
+                    </p>
+                </div>
+
+                <div class="lg:w-1/4 flex justify-center">
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-primary blur-3xl opacity-15 rounded-full animate-pulse"></div>
+                        <img src="{{ url_for('static', filename='img/chat-forty.png') }}" alt="Forty" 
+                             class="relative w-32 h-32 md:w-36 md:h-36 rounded-full border-2 border-white shadow-lg object-cover transform hover:scale-105 transition-transform duration-500 antialiased">
+                    </div>
+                </div>
+            </div>
+
+            <!-- "How it works" Compact Section -->
+            <div id="how-it-works" class="mb-8 reveal delay-1 bg-gray-50/50 border border-gray-100 p-3 rounded-2xl">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 px-2">
+                    <!-- Step 1 -->
+                    <div class="flex items-center gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center font-black text-lg">1</div>
+                        <div>
+                            <h3 class="font-black text-sm text-gray-800 uppercase tracking-tight">Pick a Topic</h3>
+                            <p class="text-[12px] text-gray-500 leading-tight">Choose from health or nature basics.</p>
+                        </div>
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="flex items-center gap-4 border-l-0 md:border-l border-gray-200 md:pl-8">
+                        <div class="flex-shrink-0 w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center font-black text-lg">2</div>
+                        <div>
+                            <h3 class="font-black text-sm text-gray-800 uppercase tracking-tight">Debate Forty</h3>
+                            <p class="text-[12px] text-gray-500 leading-tight">Find the flaws in my arguments.</p>
+                        </div>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="flex items-center gap-4 border-l-0 md:border-l border-gray-200 md:pl-8">
+                        <div class="flex-shrink-0 w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center font-black text-lg">3</div>
+                        <div>
+                            <h3 class="font-black text-sm text-gray-800 uppercase tracking-tight">Stay Resilient</h3>
+                            <p class="text-[12px] text-gray-500 leading-tight">Build immunity to misinformation.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topics Grid: Compact & Aesthetic -->
+            <div id="topics" class="mb-24 mt-16 reveal delay-2">
+                <div class="text-center mb-6">
+                    <h2 class="text-xl font-black mb-1">Ready to Start?</h2>
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Select a conversation topic below</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-blue-200 via-primary/5 to-blue-100 p-6 rounded-3xl border border-blue-100">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {% set topics = [
+                            {'id': 0, 'name': 'Exercise', 'img': 'exercise.png', 'color': 'accent'},
+                            {'id': 1, 'name': 'Binge Drinking', 'img': 'drinking.png', 'color': 'secondary'},
+                            {'id': 2, 'name': 'Nature', 'img': 'nature.png', 'color': 'primary'},
+                            {'id': 3, 'name': 'Dental Care', 'img': 'dentalcare.png', 'color': 'neutral'}
+                        ] %}
+                        
+                        {% for topic in topics %}
+                        <a href="/lesson?id={{ topic.id }}" class="topic-btn group">
+                            <div class="card bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:border-primary transition-all duration-300 text-center p-4 rounded-2xl h-full flex flex-col">
+                                <figure class="mb-3">
+                                    <img src="/static/img/{{ topic.img }}" alt="{{ topic.name }}" class="w-16 h-16 object-contain group-hover:scale-110 transition-transform">
+                                </figure>
+                                <h3 class="font-bold text-sm text-gray-800 group-hover:text-primary transition-colors mb-auto">{{ topic.name }}</h3>
+                                
+                                <!-- 3-step progress for started lessons -->
+                                <div class="flex justify-center gap-1.5 mt-3 opacity-0">
+                                    <div class="w-2 h-2 rounded-full bg-gray-200"></div>
+                                    <div class="w-2 h-2 rounded-full bg-gray-200"></div>
+                                    <div class="w-2 h-2 rounded-full bg-gray-200"></div>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Academic Partners & Funding -->
+            <div class="mt-4 pb-12 reveal delay-3 flex flex-col items-center">
+                <div class="w-full max-w-4xl">
+                    
+                    <div class="flex flex-col md:flex-row gap-8 w-full items-start">
+                        <!-- Left: Academic info (60%) -->
+                        <div class="w-full md:w-3/5 space-y-4">
+                             <h3 class="text-sm font-black text-gray-500 uppercase tracking-widest mb-4">Academic Institutions & Funding Acknowledgments</h3>
+                            
+                            <!-- Logos -->
+                            <div class="flex flex-wrap justify-start items-center gap-6 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-700">
+                                <div class="p-1.5 border border-blue-50 rounded-lg bg-gray-50/30">
+                                    <img src="{{ url_for('static', filename='img/oulu_logo.png') }}" alt="University of Oulu" class="h-10 object-contain">
+                                </div>
+                                <div class="p-1.5 border border-blue-50 rounded-lg bg-gray-50/30">
+                                    <img src="{{ url_for('static', filename='img/utokyo_logo.png') }}" alt="The University of Tokyo" class="h-10 object-contain">
+                                </div>
+                            </div>
+                            
+                            <!-- University names -->
+                            <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">
+                                University of Oulu &bull; The University of Tokyo
+                            </p>
+                            <p class="text-[10px] text-gray-400 font-medium italic">
+                                Created at the University of Oulu in collaboration with The University of Tokyo
+                            </p>
+                            
+                            <!-- Funding text -->
+                            <p class="text-[9px] text-gray-400 leading-relaxed font-normal opacity-70">
+                                This research is partly funded by the Strategic Research Council (SRC), established within the Research Council of Finland (Grants 356128, 335625, 335729), and Research Fellowship funding by the Research Council of Finland (Grants 356128, 349637 and 353790). The research was also partly supported by JSPS Bilateral Collaboration between Japan and Finland (Grant Number: JPJSBP120232701). This work was partly supported by JST ASPIRE for Top Scientists (Grant Number JPMJAP2405).
+                            </p>
+                        </div>
+                        
+                        <!-- Right: Research Publication (40%) -->
+                        <div class="w-full md:w-2/5">
+                            <h3 class="text-sm font-black text-gray-500 uppercase tracking-widest mb-4">Research Publication</h3>
+                            <div class="bg-gray-50/50 p-4 rounded-3xl border border-gray-100 space-y-3">
+                                <p class="text-[11px] font-bold text-gray-700 leading-tight">
+                                    MindFort: Strengthening Logical Thinking and Misinformation Resilience through AI-Guided Conversational Debates
+                                </p>
+                       
+                                 <a href="https://crowd-computing-oulu.github.io/cognitive-inoculation-paper-page/" target="_blank" class="text-[10px] text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1">
+                                        Read more about the research 
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                    </a>
+                                <div class="flex flex-col gap-2">
+                                    <a href="/static/MindFort.pdf" target="_blank" class="btn btn-outline btn-sm rounded-xl gap-2 hover:bg-gray-100 border-gray-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                        <span class="text-[10px]">Download Paper</span>
+                                    </a>
+                                   
+                                </div>
+                                
+                                <details class="group bg-white border border-gray-200 rounded-xl overflow-hidden">
+                                    <summary class="cursor-pointer list-none text-[9px] font-black uppercase tracking-wider py-2 px-3 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                                        <span>Cite this work (BibTeX)</span>
+                                        <svg class="w-3 h-3 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </summary>
+                                    <div class="border-t border-gray-100">
+                                        <pre class="bg-gray-900 text-gray-300 p-3 text-[8px] leading-relaxed overflow-x-auto m-0">@inproceedings{mindfort2026,
+  author = {Szabo, D. and others},
+  title = {MindFort: Strengthening Logical Thinking and Misinformation Resilience through AI-Guided Conversational Debates},
+  year = {2026},
+  publisher = {ACM},
+  doi = {10.1145/3772318.3790954},
+  booktitle = {Proceedings of the CHI Conference on Human Factors in Computing Systems (CHI '26)}
+}</pre>
+                                    </div>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Auth Prompt Modal (DaisyUI) -->
+    <dialog id="authModal" class="modal modal-bottom sm:modal-middle">
+      <div class="modal-box p-8 rounded-3xl border-0 shadow-2xl">
+        <form method="dialog">
+          <button class="btn btn-sm btn-circle btn-ghost absolute right-4 top-4">✕</button>
+        </form>
+        <div class="text-center">
+            <div class="avatar online mb-6">
+              <div class="w-24 rounded-full border-4 border-gray-50 shadow-inner">
+                <img src="{{ url_for('static', filename='img/chat-forty.png') }}" />
+              </div>
+            </div>
+            <h3 class="text-3xl font-black mb-4">Track your progress?</h3>
+            <p class="text-gray-500 mb-8 leading-relaxed">
+                Sign in to save your chat history with Forty, track your learning stages, and get notified when we add new topics.
+            </p>
+            <div class="flex flex-col gap-3">
+                <a href="/signin" class="btn btn-primary rounded-full btn-lg">Sign In & Save Progress</a>
+                <button id="continueGuestBtn" class="btn btn-ghost rounded-full">Continue as Guest</button>
+            </div>
+            <p class="text-sm text-gray-400 mt-8">
+                New here? <a href="/signup" class="text-primary font-bold hover:underline">Create an account</a>
+            </p>
+        </div>
+      </div>
+    </dialog>
+
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
+    {% include 'includes/footer.html' %}
+
+    <div id="session-data" 
+         data-is-tracked="{{ 'true' if session.get('user.id') and not session.get('user.username', '').startswith('guest_') else 'false' }}"
+         style="display: none;"></div>
+
+    <script>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auth Modal Logic
+            const modal = document.getElementById('authModal');
+            const topicBtns = document.querySelectorAll('.topic-btn');
+            const continueGuestBtn = document.getElementById('continueGuestBtn');
+            const sessionData = document.getElementById('session-data');
+            let pendingUrl = '';
+
+            const isTracked = sessionData.getAttribute('data-is-tracked') === 'true';
+            const modalShown = localStorage.getItem('MindFort_auth_modal_shown');
+
+            topicBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    if (!isTracked && !modalShown) {
+                        e.preventDefault();
+                        pendingUrl = this.getAttribute('href');
+                        modal.showModal();
+                    }
+                });
+            });
+
+            if (continueGuestBtn) {
+                continueGuestBtn.addEventListener('click', () => {
+                    localStorage.setItem('MindFort_auth_modal_shown', 'true');
+                    if (pendingUrl) window.location.href = pendingUrl;
+                    else modal.close();
+                });
+            }
+        });
+    </script>
+
+    <style>
+        .topic-btn:hover .card {
+            border-color: #0d6efd !important;
+        }
+    </style>
+
+</body>
+</html>
