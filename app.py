@@ -203,88 +203,7 @@ def admin():
         current_path=request.path
     )
 
-@app.route('/prolific_login', methods=['GET'])
-def prolific_login():
-    username = request.args.get('PROLIFIC_PID')
-    
-    # try logging in first
-    conn = get_db_connection()
-    user = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
-    conn.close()
 
-    if user:
-        session['user.id'] = user['id']
-        session['user.username'] = user['username']
-        session['user.email'] =  user['email']
-        session['user.first_name'] =  user['first_name']
-        session['user.last_name'] = user['last_name']
-        session['user.level'] = user['level']
-        session['user.lesson_state'] = user['lesson_state']
-        session['user.lessons_order'] = user['lessons_order']
-        session['user.lesson_cases'] = user['lesson_cases'].split(',')
-        session['user.age'] = user['age']
-        session['user.gender'] = user['gender']
-        session['user.country'] = user['country']
-        flash('Signed in successfully!', 'success')
-        return redirect(url_for('index'))
-    else:
-           
-        first_name = "Participant " + str(get_user_count() + 1)
-
-        # Get signup datetime and IP
-        signup_datetime = datetime.utcnow()
-        user_ip = request.remote_addr
-
-
-        # Generate lesson order
-        lessons = range(0,4)
-        # random.shuffle(lessons)  # Shuffle lessons
-        # Convert lesson order to string for storage
-        lesson_order_str = ','.join(map(str, lessons))
-
-        # Generate lesson cases
-        lesson_cases = balanced_latin_square(get_user_count() + 1)
-        lesson_cases_str = ','.join(map(str, lesson_cases))
-
-        try:
-            conn = get_db_connection()
-            conn.execute("""
-                INSERT INTO users (first_name, last_name, username, age, gender, country, email, password, level, lesson_state, signup_datetime, ip, lessons_order, lesson_cases)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                         (first_name, '', username, '', '', '', username, '', 0, 0, signup_datetime, user_ip, lesson_order_str, lesson_cases_str))
-            conn.commit()
-            conn.close()
-            
-            flash('Account created successfully!', 'success')
-
-            # Sign user in automatically
-            conn = get_db_connection()
-            user = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
-            conn.close()
-
-            if user:
-                session['user.id'] = user['id']
-                session['user.username'] = user['username']
-                session['user.email'] =  user['email']
-                session['user.first_name'] =  user['first_name']
-                session['user.last_name'] = user['last_name']
-                session['user.level'] = user['level']
-                session['user.lesson_state'] = user['lesson_state']
-                session['user.lessons_order'] = user['lessons_order']
-                session['user.lesson_cases'] = user['lesson_cases'].split(',')
-                session['user.age'] = user['age']
-                session['user.gender'] = user['gender']
-                session['user.country'] = user['country']
-                return redirect(url_for('index'))
-            else:
-                return redirect(url_for('signin'))
-        
-        except sqlite3.IntegrityError as e :
-            flash(f'Username or email is already registered. ({e})', 'danger')
-            return render_template('signup.html',
-                                   session_id=get_session_id(),
-                                   version=VERSION,
-                                   current_path=request.path)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -322,7 +241,7 @@ def signup():
         lesson_order_str = ','.join(map(str, lessons))
 
         # Generate lesson cases
-        lesson_cases = balanced_latin_square(get_user_count() + 1)
+        lesson_cases = [3, 3, 3, 3]
         lesson_cases_str = ','.join(map(str, lesson_cases))
 
         try:
@@ -405,17 +324,13 @@ def signin():
       current_path=request.path)
 
 
-def ensure_guest_session(is_public=True):
+def ensure_guest_session():
     """Ensure a guest user exists in the session and database."""
     if 'user.id' not in session:
         # Create a guest user entry
         guest_id = str(uuid.uuid4())[:8]
-        if is_public:
-            username = f"guest_{guest_id}"
-            first_name = "Guest"
-        else:
-            username = f"researcher_guest_{guest_id}"
-            first_name = "Researcher Guest"
+        username = f"guest_{guest_id}"
+        first_name = "Guest"
             
         signup_datetime = datetime.utcnow()
         user_ip = request.remote_addr
@@ -423,9 +338,7 @@ def ensure_guest_session(is_public=True):
         # Default lesson order (0,1,2,3)
         lesson_order_str = "0,1,2,3"
         
-        # Default cases: Public mode uses 3 (Chat only), Researcher mode uses 3 for now but original logic might apply
-        # The user wants "exact original" for researcher, which implies cases might be dynamic.
-        # However, for an auto-guest, we need to assign something. Let's use 3 for both but researcher has full states.
+        # Public mode uses 3 (Chat only)
         lesson_cases_str = "3,3,3,3"
 
         conn = get_db_connection()
@@ -445,26 +358,9 @@ def ensure_guest_session(is_public=True):
         session['user.lesson_state'] = 0
         session['user.lessons_order'] = lesson_order_str
         session['user.lesson_cases'] = ["3", "3", "3", "3"]
-        session['is_public'] = is_public
+        session['is_public'] = True
 
-@app.route('/study')
-def index_study():
-    # Ensure guest session if not logged in
-    if 'user.id' not in session:
-        ensure_guest_session(is_public=False)
-        
-    # Original research study landing page
-    lessons_ordered_for_user = {}
-    
-    if session.get('user.lessons_order'):
-        for i in range (0, len(lessons)):
-            lessons_ordered_for_user[i] = get_lesson_by_id_with_ordering(i, session['user.lessons_order'])
-    
-    return render_template('researcher/index.html', 
-        lessons = lessons_ordered_for_user,
-        session_id = get_session_id(),
-        version = VERSION,
-        current_path=request.path)
+
 
 @app.route('/lesson', methods=['GET'])
 def lesson():
@@ -1058,41 +954,9 @@ def error_not_found(_error):
   return render_template('404.html', 
       session_id = get_session_id(),
       version = VERSION,
-      current_path=request.path)
+      current_path=request.path), 404
 
-def balanced_latin_square(participant_id):
-    """
-    Generates a balanced Latin square order for the given conditions and participant.
 
-    Parameters:
-        array (list): The list of conditions.
-        participant_id (int): The participant's identifier.
-
-    Returns:
-        list: The balanced Latin square order for the given participant.
-    """
-    cases = range(0,4)
-    result = []
-    j = 0
-    h = 0
-
-    for i in range(len(cases)):
-        val = 0
-        if i < 2 or i % 2 != 0:
-            val = j
-            j += 1
-        else:
-            val = len(cases) - h - 1
-            h += 1
-
-        idx = (val + participant_id) % len(cases)
-        result.append(cases[idx])
-
-    # Reverse if the number of conditions and the participant's ID are both odd
-    if len(cases) % 2 != 0 and participant_id % 2 != 0:
-        result.reverse()
-
-    return result
 def get_user_count():
     """
     Returns the number of users in the 'users' table.
