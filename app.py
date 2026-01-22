@@ -178,6 +178,7 @@ def index_public():
     session['is_public'] = True
     return render_template('index_public.html', 
         version = VERSION,
+        session_id = get_session_id(),
         current_path=request.path)
 
     
